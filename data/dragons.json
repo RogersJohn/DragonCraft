@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "dragons": [
+    {
+      "id": "",
+      "name": "",
+      "description": "",
+      "element": "",
+      "rarity": "",
+      "base_stats": {
+        "health": 0,
+        "speed": 0,
+        "strength": 0,
+        "magic": 0
+      },
+      "growth_stages": {
+        "egg_duration_seconds": 0,
+        "hatchling_duration_seconds": 0
+      },
+      "abilities": [],
+      "unlock_condition": ""
+    }
+  ]
+}

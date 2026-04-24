@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "resources": [
+    {
+      "id": "",
+      "name": "",
+      "description": "",
+      "icon": "",
+      "base_tick_rate": 0,
+      "max_storage": 0,
+      "starting_amount": 0
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+# Godot 4 .gitignore
+
+# Godot-specific ignores
+.godot/
+*.translation
+
+# Exported projects
+/export/
+*.exe
+*.x86_64
+*.apk
+*.aab
+*.ipa
+
+# Import cache
+*.import
+
+# Mono/C# specific
+.mono/
+data_*/
+mono_crash.*.json

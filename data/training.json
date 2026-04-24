@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "training_actions": [
+    {
+      "id": "",
+      "name": "",
+      "description": "",
+      "target": "",
+      "duration_seconds": 0,
+      "cost": {
+        "wood": 0,
+        "stone": 0,
+        "food": 0,
+        "arcane": 0
+      },
+      "stat_gains": {
+        "health": 0,
+        "speed": 0,
+        "strength": 0,
+        "magic": 0
+      },
+      "bonding_gain": 0,
+      "requires_building": ""
+    }
+  ]
+}
