@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/village.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/images/First View Village.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/images/first_view_village.png" id="2"]
 
 [node name="Village" type="Control"]
 anchors_preset = 15
@@ -44,6 +44,16 @@ text = "💰 Gold: 0"
 
 [node name="WoodLabel" type="Label" parent="HUD/Panel/VBox"]
 text = "🪵 Wood: 0"
+
+[node name="BackButton" type="Button" parent="HUD"]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -160.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = 45.0
+grow_horizontal = 0
+text = "← Back to Map"
 
 [node name="ResourceTimer" type="Timer" parent="."]
 wait_time = 5.0
