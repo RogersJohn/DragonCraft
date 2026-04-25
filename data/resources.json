@@ -1,14 +1,7 @@
 {
-  "schema_version": "1.0",
-  "resources": [
-    {
-      "id": "",
-      "name": "",
-      "description": "",
-      "icon": "",
-      "base_tick_rate": 0,
-      "max_storage": 0,
-      "starting_amount": 0
-    }
-  ]
+  "resources": {
+    "food": { "display_name": "Food", "starting_value": 100, "tick_amount": 1, "tick_interval_seconds": 5 },
+    "gold": { "display_name": "Gold", "starting_value": 100, "tick_amount": 1, "tick_interval_seconds": 5 },
+    "wood": { "display_name": "Wood", "starting_value": 100, "tick_amount": 1, "tick_interval_seconds": 5 }
+  }
 }
