@@ -8,7 +8,7 @@ signal enter_village
 func _ready() -> void:
 	_zone.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	_style_zone()
-	_zone.pressed.connect(_on_zone_pressed)
+	_zone.button_down.connect(_on_zone_pressed)
 
 
 func _on_zone_pressed() -> void:
