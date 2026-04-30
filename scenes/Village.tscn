@@ -17,13 +17,88 @@ expand_mode = 1
 stretch_mode = 5
 texture = ExtResource("2")
 
+[node name="House1" type="Button" parent="."]
+anchor_left = 0.35
+anchor_top = 0.48
+anchor_right = 0.35
+anchor_bottom = 0.48
+offset_left = -40.0
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+focus_mode = 0
+flat = true
+
+[node name="House2" type="Button" parent="."]
+anchor_left = 0.48
+anchor_top = 0.55
+anchor_right = 0.48
+anchor_bottom = 0.55
+offset_left = -40.0
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+focus_mode = 0
+flat = true
+
+[node name="House3" type="Button" parent="."]
+anchor_left = 0.58
+anchor_top = 0.62
+anchor_right = 0.58
+anchor_bottom = 0.62
+offset_left = -40.0
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+focus_mode = 0
+flat = true
+
+[node name="House4" type="Button" parent="."]
+anchor_left = 0.72
+anchor_top = 0.50
+anchor_right = 0.72
+anchor_bottom = 0.50
+offset_left = -40.0
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+focus_mode = 0
+flat = true
+
+[node name="House5" type="Button" parent="."]
+anchor_left = 0.42
+anchor_top = 0.70
+anchor_right = 0.42
+anchor_bottom = 0.70
+offset_left = -40.0
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+focus_mode = 0
+flat = true
+
 [node name="HUD" type="CanvasLayer" parent="."]
 
 [node name="Panel" type="Panel" parent="HUD"]
 offset_left = 10.0
 offset_top = 10.0
 offset_right = 220.0
-offset_bottom = 180.0
+offset_bottom = 205.0
 
 [node name="VBox" type="VBoxContainer" parent="HUD/Panel"]
 anchor_right = 1.0
@@ -47,6 +122,9 @@ text = "💰 Gold: 0"
 
 [node name="WoodLabel" type="Label" parent="HUD/Panel/VBox"]
 text = "🪵 Wood: 0"
+
+[node name="PeopleLabel" type="Label" parent="HUD/Panel/VBox"]
+text = "👥 People: 0 / 25"
 
 [node name="BackButton" type="Button" parent="HUD"]
 anchor_left = 1.0

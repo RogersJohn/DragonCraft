@@ -1,7 +1,8 @@
 {
   "resources": {
-    "food": { "display_name": "Food", "starting_value": 100, "tick_amount": 1, "tick_interval_seconds": 5 },
-    "gold": { "display_name": "Gold", "starting_value": 100, "tick_amount": 1, "tick_interval_seconds": 5 },
-    "wood": { "display_name": "Wood", "starting_value": 100, "tick_amount": 1, "tick_interval_seconds": 5 }
+    "food":   { "display_name": "Food",   "starting_value": 100, "tick_amount": 1, "tick_interval_seconds": 5 },
+    "gold":   { "display_name": "Gold",   "starting_value": 100, "tick_amount": 1, "tick_interval_seconds": 5 },
+    "wood":   { "display_name": "Wood",   "starting_value": 100, "tick_amount": 1, "tick_interval_seconds": 5 },
+    "people": { "display_name": "People", "starting_value": 5,   "tick_amount": 0, "tick_interval_seconds": 5 }
   }
 }

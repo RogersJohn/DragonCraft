@@ -1,0 +1,10 @@
+{
+  "houses": [
+    {"id": 1, "name": "House 1", "capacity": 5, "occupants": 1},
+    {"id": 2, "name": "House 2", "capacity": 5, "occupants": 1},
+    {"id": 3, "name": "House 3", "capacity": 5, "occupants": 1},
+    {"id": 4, "name": "House 4", "capacity": 5, "occupants": 1},
+    {"id": 5, "name": "House 5", "capacity": 5, "occupants": 1}
+  ],
+  "settler_food_cost": 20
+}
