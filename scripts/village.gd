@@ -2,18 +2,20 @@ extends Control
 
 signal back_to_map
 
+@onready var _season_label: Label = $HUD/Panel/VBox/SeasonLabel
 @onready var _food_label: Label = $HUD/Panel/VBox/FoodLabel
 @onready var _gold_label: Label = $HUD/Panel/VBox/GoldLabel
 @onready var _wood_label: Label = $HUD/Panel/VBox/WoodLabel
 @onready var _back_button: Button = $HUD/BackButton
 @onready var _timer: Timer = $ResourceTimer
 
-var _food := 0
-var _gold := 0
-var _wood := 0
-var _tick_food := 0
-var _tick_gold := 0
-var _tick_wood := 0
+var _food: float = 0.0
+var _gold: float = 0.0
+var _wood: float = 0.0
+var _base_tick_food: float = 0.0
+var _base_tick_gold: float = 0.0
+var _base_tick_wood: float = 0.0
+var _tick_multiplier: float = 1.0
 
 
 func _ready() -> void:
@@ -21,15 +23,18 @@ func _ready() -> void:
 	_food = res.food.starting_value
 	_gold = res.gold.starting_value
 	_wood = res.wood.starting_value
-	_tick_food = res.food.tick_amount
-	_tick_gold = res.gold.tick_amount
-	_tick_wood = res.wood.tick_amount
+	_base_tick_food = res.food.tick_amount
+	_base_tick_gold = res.gold.tick_amount
+	_base_tick_wood = res.wood.tick_amount
 	_timer.wait_time = res.food.tick_interval_seconds
 	_timer.timeout.connect(_on_tick)
 	_timer.start()
 	_update_hud()
 	_style_back_button()
 	_back_button.pressed.connect(_on_back_pressed)
+	SeasonManager.season_changed.connect(_on_season_changed)
+	SeasonManager.season_tick.connect(_on_season_tick)
+	_update_season_label(SeasonManager.get_current_season(), SeasonManager.get_time_remaining())
 
 
 func _load_resources():
@@ -41,10 +46,29 @@ func _load_resources():
 
 
 func _on_tick() -> void:
-	_food += _tick_food
-	_gold += _tick_gold
-	_wood += _tick_wood
+	_food += _base_tick_food * _tick_multiplier
+	_gold += _base_tick_gold * _tick_multiplier
+	_wood += _base_tick_wood * _tick_multiplier
 	_update_hud()
+
+
+func _on_season_changed(season_data: Dictionary) -> void:
+	_food += float(season_data.get("food_bonus", 0))
+	_gold += float(season_data.get("gold_bonus", 0))
+	_wood += float(season_data.get("wood_bonus", 0))
+	_tick_multiplier = float(season_data.get("tick_multiplier", 1.0))
+	_update_hud()
+
+
+func _on_season_tick(time_remaining: float) -> void:
+	_update_season_label(SeasonManager.get_current_season(), time_remaining)
+
+
+func _update_season_label(season: Dictionary, time_remaining: float) -> void:
+	var total_secs := int(time_remaining)
+	var mins := total_secs / 60
+	var secs := total_secs % 60
+	_season_label.text = "%s %s  %02d:%02d" % [season["emoji"], season["name"], mins, secs]
 
 
 func _on_back_pressed() -> void:
@@ -53,9 +77,9 @@ func _on_back_pressed() -> void:
 
 
 func _update_hud() -> void:
-	_food_label.text = "🍖 Food: %d" % _food
-	_gold_label.text = "💰 Gold: %d" % _gold
-	_wood_label.text = "🪵 Wood: %d" % _wood
+	_food_label.text = "🍖 Food: %d" % int(_food)
+	_gold_label.text = "💰 Gold: %d" % int(_gold)
+	_wood_label.text = "🪵 Wood: %d" % int(_wood)
 
 
 func _style_back_button() -> void:

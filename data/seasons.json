@@ -1,0 +1,41 @@
+{
+  "season_duration_seconds": 900,
+  "seasons": [
+    {
+      "name": "Spring",
+      "emoji": "🌸",
+      "food_bonus": 50,
+      "wood_bonus": 0,
+      "gold_bonus": 0,
+      "tick_multiplier": 1.0,
+      "population_growth_allowed": true
+    },
+    {
+      "name": "Summer",
+      "emoji": "☀️",
+      "food_bonus": 0,
+      "wood_bonus": 50,
+      "gold_bonus": 0,
+      "tick_multiplier": 1.0,
+      "population_growth_allowed": true
+    },
+    {
+      "name": "Autumn",
+      "emoji": "🍂",
+      "food_bonus": 75,
+      "wood_bonus": 0,
+      "gold_bonus": 50,
+      "tick_multiplier": 1.0,
+      "population_growth_allowed": true
+    },
+    {
+      "name": "Winter",
+      "emoji": "❄️",
+      "food_bonus": 0,
+      "wood_bonus": 0,
+      "gold_bonus": 0,
+      "tick_multiplier": 0.5,
+      "population_growth_allowed": false
+    }
+  ]
+}
