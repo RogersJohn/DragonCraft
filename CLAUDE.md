@@ -84,6 +84,12 @@ godot scenes/Main.tscn
 
 For day-to-day development, open `project.godot` in the Godot 4 editor.
 
+## Session Progress
+
+- **Phase 1** — Title screen, crossfade, village HUD, resource tick: **complete**
+- **Phase 2** — Season system, house menus, people resource, save/load, UI theme refactor: **complete**
+- **Phase 3** — Not started
+
 ## Asset Notes
 
 - `First View Village.png`, `first_map.jpeg`, `logo.jpeg` — concept art in the repo root, should be moved to `assets/images/` once the folder structure is created

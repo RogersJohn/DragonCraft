@@ -136,5 +136,15 @@ offset_bottom = 45.0
 grow_horizontal = 0
 text = "← Back to Map"
 
+[node name="SaveLabel" type="Label" parent="HUD"]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -200.0
+offset_top = 50.0
+offset_right = -10.0
+offset_bottom = 75.0
+grow_horizontal = 0
+text = ""
+
 [node name="ResourceTimer" type="Timer" parent="."]
 wait_time = 5.0

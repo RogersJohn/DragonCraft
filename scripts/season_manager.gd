@@ -55,3 +55,16 @@ func get_time_remaining() -> float:
 
 func is_population_growth_allowed() -> bool:
 	return _seasons[_season_index]["population_growth_allowed"]
+
+
+func get_season_index() -> int:
+	return _season_index
+
+
+func get_elapsed() -> float:
+	return _elapsed
+
+
+func restore_season(index: int, elapsed: float) -> void:
+	_season_index = clampi(index, 0, _seasons.size() - 1)
+	_elapsed = clampf(elapsed, 0.0, _season_duration)

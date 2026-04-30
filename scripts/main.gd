@@ -7,6 +7,7 @@ const FADE_HALF := 0.75
 
 var _overlay: ColorRect
 var _current: Node
+var _pending_state: Dictionary = {}
 
 
 func _ready() -> void:
@@ -29,6 +30,18 @@ func _spawn_title_screen() -> void:
 	add_child(_current)
 	move_child(_overlay, get_child_count() - 1)
 	_current.scene_transition.connect(func(): _crossfade_to(_spawn_world_map))
+	_current.continue_requested.connect(_on_continue_requested)
+
+
+func _on_continue_requested() -> void:
+	var state := SaveManager.load_game()
+	if not state.is_empty():
+		_pending_state = state
+		SeasonManager.restore_season(
+			int(state.get("season_index", 0)),
+			float(state.get("season_elapsed", 0.0))
+		)
+	_crossfade_to(_spawn_world_map)
 
 
 func _spawn_world_map() -> void:
@@ -43,3 +56,6 @@ func _spawn_village() -> void:
 	add_child(_current)
 	move_child(_current, 0)
 	_current.back_to_map.connect(func(): _crossfade_to(_spawn_world_map))
+	if not _pending_state.is_empty():
+		_current.restore_state(_pending_state)
+		_pending_state = {}

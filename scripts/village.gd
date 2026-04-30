@@ -1,9 +1,12 @@
 extends Control
 
+const UITheme = preload("res://scripts/ui/ui_theme.gd")
+
 signal back_to_map
 
 const HOUSE_MANAGER_SCRIPT := preload("res://scripts/house_manager.gd")
 const HOUSE_POPUP_SCENE := preload("res://scenes/ui/HousePopup.tscn")
+const AUTOSAVE_INTERVAL := 300.0
 
 @onready var _season_label: Label = $HUD/Panel/VBox/SeasonLabel
 @onready var _food_label: Label = $HUD/Panel/VBox/FoodLabel
@@ -12,11 +15,12 @@ const HOUSE_POPUP_SCENE := preload("res://scenes/ui/HousePopup.tscn")
 @onready var _people_label: Label = $HUD/Panel/VBox/PeopleLabel
 @onready var _back_button: Button = $HUD/BackButton
 @onready var _timer: Timer = $ResourceTimer
+@onready var _save_label: Label = $HUD/SaveLabel
 
 var _food: float = 0.0
 var _gold: float = 0.0
 var _wood: float = 0.0
-var _people: float = 0.0
+var _people: int = 0
 var _base_tick_food: float = 0.0
 var _base_tick_gold: float = 0.0
 var _base_tick_wood: float = 0.0
@@ -24,6 +28,7 @@ var _tick_multiplier: float = 1.0
 var _house_manager: Node = null
 var _active_popup: Node = null
 var _active_popup_house_id: int = 0
+var _save_tween: Tween = null
 
 
 func _ready() -> void:
@@ -33,21 +38,34 @@ func _ready() -> void:
 	_food = res.food.starting_value
 	_gold = res.gold.starting_value
 	_wood = res.wood.starting_value
-	_people = res.people.starting_value
+	_people = int(res.people.starting_value)
 	_base_tick_food = res.food.tick_amount
 	_base_tick_gold = res.gold.tick_amount
 	_base_tick_wood = res.wood.tick_amount
 	_timer.wait_time = res.food.tick_interval_seconds
 	_timer.timeout.connect(_on_tick)
 	_timer.start()
-	_update_hud()
-	_style_back_button()
+	_save_label.add_theme_color_override("font_color", Color(0.9, 0.72, 0.08))
+	_save_label.modulate.a = 0.0
+	UITheme.apply_gold_button(_back_button)
 	_back_button.pressed.connect(_on_back_pressed)
 	_connect_house_zones()
+	var autosave_timer := Timer.new()
+	autosave_timer.wait_time = AUTOSAVE_INTERVAL
+	autosave_timer.autostart = true
+	autosave_timer.timeout.connect(_on_autosave)
+	add_child(autosave_timer)
 	SeasonManager.season_changed.connect(_on_season_changed)
 	SeasonManager.season_tick.connect(_on_season_tick)
 	_on_season_changed(SeasonManager.get_current_season())
 	_update_season_label(SeasonManager.get_current_season(), SeasonManager.get_time_remaining())
+	_update_hud()
+
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_F5:
+			_do_save("manual")
 
 
 func _load_resources():
@@ -127,10 +145,57 @@ func _on_settler_requested(house_id: int) -> void:
 	if not _house_manager.add_settler(house_id):
 		return
 	_food -= float(_house_manager.get_settler_food_cost())
-	_people = float(_house_manager.get_total_population())
+	_people = _house_manager.get_total_population()
 	_update_hud()
 	if _active_popup != null:
 		_active_popup.refresh(_house_manager.get_house(house_id), _food)
+
+
+func _on_autosave() -> void:
+	_do_save("auto")
+
+
+func _do_save(slot: String) -> void:
+	SaveManager.save_game(_build_save_state(), slot)
+	_show_save_label("Game Saved" if slot == "manual" else "Auto-saved")
+
+
+func _build_save_state() -> Dictionary:
+	var houses := []
+	for i in range(1, 6):
+		var h: Dictionary = _house_manager.get_house(i)
+		houses.append({"id": int(h["id"]), "occupants": int(h["occupants"])})
+	return {
+		"food": _food,
+		"gold": _gold,
+		"wood": _wood,
+		"people": _people,
+		"houses": houses,
+		"season_index": SeasonManager.get_season_index(),
+		"season_elapsed": SeasonManager.get_elapsed(),
+		"current_scene": "village"
+	}
+
+
+func restore_state(state: Dictionary) -> void:
+	_food = float(state.get("food", _food))
+	_gold = float(state.get("gold", _gold))
+	_wood = float(state.get("wood", _wood))
+	for h_state in state.get("houses", []):
+		var h: Dictionary = _house_manager.get_house(int(h_state["id"]))
+		if not h.is_empty():
+			h["occupants"] = int(h_state["occupants"])
+	_people = _house_manager.get_total_population()
+	_update_hud()
+
+
+func _show_save_label(msg: String) -> void:
+	if _save_tween != null:
+		_save_tween.kill()
+	_save_label.text = msg
+	_save_label.modulate.a = 1.0
+	_save_tween = create_tween()
+	_save_tween.tween_property(_save_label, "modulate:a", 0.0, 2.0)
 
 
 func _update_season_label(season: Dictionary, time_remaining: float) -> void:
@@ -153,27 +218,3 @@ func _update_hud() -> void:
 		_house_manager.get_total_population(),
 		_house_manager.get_max_population()
 	]
-
-
-func _style_back_button() -> void:
-	var normal := StyleBoxFlat.new()
-	normal.bg_color = Color(0.08, 0.06, 0.03)
-	normal.border_width_left = 2
-	normal.border_width_top = 2
-	normal.border_width_right = 2
-	normal.border_width_bottom = 2
-	normal.border_color = Color(0.75, 0.55, 0.05)
-	var hover := StyleBoxFlat.new()
-	hover.bg_color = Color(0.14, 0.10, 0.04)
-	hover.border_width_left = 2
-	hover.border_width_top = 2
-	hover.border_width_right = 2
-	hover.border_width_bottom = 2
-	hover.border_color = Color(1.0, 0.78, 0.15)
-	var focus := StyleBoxEmpty.new()
-	_back_button.add_theme_stylebox_override("normal", normal)
-	_back_button.add_theme_stylebox_override("hover", hover)
-	_back_button.add_theme_stylebox_override("pressed", hover)
-	_back_button.add_theme_stylebox_override("focus", focus)
-	_back_button.add_theme_color_override("font_color", Color(0.9, 0.72, 0.08))
-	_back_button.add_theme_font_size_override("font_size", 16)
