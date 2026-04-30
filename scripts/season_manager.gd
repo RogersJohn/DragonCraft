@@ -19,10 +19,19 @@ func _ready() -> void:
 
 
 func _load_data() -> void:
+	var fallback := [{"name":"Spring","emoji":"🌸","food_bonus":0,"wood_bonus":0,"gold_bonus":0,"tick_multiplier":1.0,"population_growth_allowed":true}]
+	if not FileAccess.file_exists("res://data/seasons.json"):
+		push_error("seasons.json not found — using fallback Spring season")
+		_seasons = fallback
+		return
 	var file := FileAccess.open("res://data/seasons.json", FileAccess.READ)
 	var text := file.get_as_text()
 	file.close()
 	var parsed = JSON.parse_string(text)
+	if parsed == null:
+		push_error("seasons.json failed to parse — using fallback Spring season")
+		_seasons = fallback
+		return
 	_season_duration = float(parsed["season_duration_seconds"])
 	_seasons = parsed["seasons"]
 

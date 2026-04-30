@@ -34,14 +34,22 @@ func _ready() -> void:
 	_back_button.pressed.connect(_on_back_pressed)
 	SeasonManager.season_changed.connect(_on_season_changed)
 	SeasonManager.season_tick.connect(_on_season_tick)
+	_on_season_changed(SeasonManager.get_current_season())
 	_update_season_label(SeasonManager.get_current_season(), SeasonManager.get_time_remaining())
 
 
 func _load_resources():
+	var fallback := {"food":{"starting_value":100,"tick_amount":1,"tick_interval_seconds":5},"gold":{"starting_value":100,"tick_amount":1,"tick_interval_seconds":5},"wood":{"starting_value":100,"tick_amount":1,"tick_interval_seconds":5}}
+	if not FileAccess.file_exists("res://data/resources.json"):
+		push_error("resources.json not found — using fallback resource values")
+		return fallback
 	var file := FileAccess.open("res://data/resources.json", FileAccess.READ)
 	var text := file.get_as_text()
 	file.close()
 	var parsed = JSON.parse_string(text)
+	if parsed == null:
+		push_error("resources.json failed to parse — using fallback resource values")
+		return fallback
 	return parsed["resources"]
 
 
