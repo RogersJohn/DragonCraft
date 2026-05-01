@@ -5,6 +5,7 @@ const UITheme = preload("res://scripts/ui/ui_theme.gd")
 signal back_to_map
 
 const HOUSE_MANAGER_SCRIPT := preload("res://scripts/house_manager.gd")
+const PERSON_MANAGER_SCRIPT := preload("res://scripts/person_manager.gd")
 const HOUSE_POPUP_SCENE := preload("res://scenes/ui/HousePopup.tscn")
 const AUTOSAVE_INTERVAL := 300.0
 
@@ -21,12 +22,12 @@ const AUTOSAVE_INTERVAL := 300.0
 var _food: float = 0.0
 var _gold: float = 0.0
 var _wood: float = 0.0
-var _people: int = 0
 var _base_tick_food: float = 0.0
 var _base_tick_gold: float = 0.0
 var _base_tick_wood: float = 0.0
 var _tick_multiplier: float = 1.0
 var _house_manager: Node = null
+var _person_manager: Node = null
 var _active_popup: Node = null
 var _active_popup_house_id: int = 0
 var _save_tween: Tween = null
@@ -35,11 +36,13 @@ var _save_tween: Tween = null
 func _ready() -> void:
 	_house_manager = HOUSE_MANAGER_SCRIPT.new()
 	add_child(_house_manager)
+	_person_manager = PERSON_MANAGER_SCRIPT.new()
+	add_child(_person_manager)
+	_person_manager.init(_house_manager)
 	var res = _load_resources()
 	_food = res.food.starting_value
 	_gold = res.gold.starting_value
 	_wood = res.wood.starting_value
-	_people = int(res.people.starting_value)
 	_base_tick_food = res.food.tick_amount
 	_base_tick_gold = res.gold.tick_amount
 	_base_tick_wood = res.wood.tick_amount
@@ -76,7 +79,7 @@ func _load_resources():
 		"food":   {"starting_value": 100, "tick_amount": 1, "tick_interval_seconds": 5},
 		"gold":   {"starting_value": 100, "tick_amount": 1, "tick_interval_seconds": 5},
 		"wood":   {"starting_value": 100, "tick_amount": 1, "tick_interval_seconds": 5},
-		"people": {"starting_value": 5,   "tick_amount": 0, "tick_interval_seconds": 5}
+		"people": {"starting_value": 0,   "tick_amount": 0, "tick_interval_seconds": 5}
 	}
 	if not FileAccess.file_exists("res://data/resources.json"):
 		push_error("resources.json not found — using fallback resource values")
@@ -134,7 +137,8 @@ func _on_house_zone_pressed(house_id: int) -> void:
 		_house_manager.get_house(house_id),
 		_food,
 		_house_manager.get_settler_food_cost(),
-		_house_manager
+		_house_manager,
+		_person_manager
 	)
 	_active_popup.settler_requested.connect(_on_settler_requested)
 	_active_popup.closed.connect(_close_popup)
@@ -150,10 +154,9 @@ func _close_popup() -> void:
 func _on_settler_requested(house_id: int) -> void:
 	if _food < float(_house_manager.get_settler_food_cost()):
 		return
-	if not _house_manager.add_settler(house_id):
+	if _person_manager.add_settler(house_id) == null:
 		return
 	_food -= float(_house_manager.get_settler_food_cost())
-	_people = _house_manager.get_total_population()
 	_update_hud()
 	if _active_popup != null:
 		_active_popup.refresh(_house_manager.get_house(house_id), _food)
@@ -174,15 +177,14 @@ func _build_save_state() -> Dictionary:
 		var h: Dictionary = _house_manager.get_house(i)
 		houses.append({
 			"id": int(h["id"]),
-			"occupants": int(h["occupants"]),
 			"founding_day": int(h.get("founding_day", 0))
 		})
 	return {
 		"food": _food,
 		"gold": _gold,
 		"wood": _wood,
-		"people": _people,
 		"houses": houses,
+		"person_manager": _person_manager.to_dict(),
 		"season_index": SeasonManager.get_season_index(),
 		"season_elapsed": SeasonManager.get_elapsed(),
 		"game_clock_elapsed": GameClock.get_elapsed_seconds(),
@@ -197,9 +199,8 @@ func restore_state(state: Dictionary) -> void:
 	for h_state in state.get("houses", []):
 		var h: Dictionary = _house_manager.get_house(int(h_state["id"]))
 		if not h.is_empty():
-			h["occupants"] = int(h_state["occupants"])
 			h["founding_day"] = int(h_state.get("founding_day", 0))
-	_people = _house_manager.get_total_population()
+	_person_manager.restore(state.get("person_manager", {}))
 	GameClock.restore(float(state.get("game_clock_elapsed", 0.0)))
 	_day_label.text = "📅 Day %d" % GameClock.get_current_day()
 	_update_hud()
@@ -231,6 +232,6 @@ func _update_hud() -> void:
 	_gold_label.text = "💰 Gold: %d" % int(_gold)
 	_wood_label.text = "🪵 Wood: %d" % int(_wood)
 	_people_label.text = "👥 People: %d / %d" % [
-		_house_manager.get_total_population(),
-		_house_manager.get_max_population()
+		_person_manager.get_population(),
+		_person_manager.get_max_population()
 	]

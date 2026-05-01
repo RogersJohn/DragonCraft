@@ -8,6 +8,7 @@ signal closed
 var _house_id: int = 0
 var _settler_cost: int = 50
 var _house_manager: Node = null
+var _person_manager: Node = null
 
 @onready var _close_button: Button = $CloseButton
 @onready var _name_label: Label = $PopupPanel/VBox/HouseNameLabel
@@ -23,17 +24,20 @@ func _ready() -> void:
 	UITheme.apply_gold_button(_settler_button)
 
 
-func setup(house_data: Dictionary, food: float, settler_cost: int, house_manager: Node) -> void:
+func setup(house_data: Dictionary, food: float, settler_cost: int, house_manager: Node, person_manager: Node) -> void:
 	_house_id = int(house_data["id"])
 	_settler_cost = settler_cost
 	_house_manager = house_manager
+	_person_manager = person_manager
 	_name_label.text = str(house_data["name"])
 	_cost_label.text = "Cost: %d Food" % settler_cost
 	refresh(house_data, food)
 
 
 func refresh(house_data: Dictionary, food: float) -> void:
-	var occupants := int(house_data["occupants"])
+	var occupants := 0
+	if _person_manager != null:
+		occupants = _person_manager.get_people_in_house(_house_id).size()
 	var capacity := int(house_data["capacity"])
 	var reason := _get_disable_reason(occupants, capacity, food)
 	_occupants_label.text = "%d / %d" % [occupants, capacity]

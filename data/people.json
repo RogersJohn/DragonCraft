@@ -1,0 +1,18 @@
+{
+  "starting_people": [
+    {"id": 1, "name": "Aldric",  "house_id": 1, "role": "villager"},
+    {"id": 2, "name": "Brenna",  "house_id": 2, "role": "villager"},
+    {"id": 3, "name": "Caelan",  "house_id": 3, "role": "villager"},
+    {"id": 4, "name": "Dwyn",    "house_id": 4, "role": "villager"},
+    {"id": 5, "name": "Eira",    "house_id": 5, "role": "villager"}
+  ],
+  "roles": ["villager", "explorer", "wizard", "dragon_trainer", "blacksmith", "farmer"],
+  "name_pool": [
+    "Aldric", "Brenna", "Caelan", "Dwyn", "Eira",
+    "Fendrel", "Gilda", "Hadwin", "Isadora", "Jorah",
+    "Kaela", "Leoric", "Morwen", "Niamh", "Osric",
+    "Petra", "Quillan", "Rowena", "Silas", "Tara"
+  ],
+  "next_id": 6,
+  "next_name_index": 5
+}
