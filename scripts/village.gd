@@ -7,6 +7,7 @@ signal back_to_map
 const HOUSE_MANAGER_SCRIPT := preload("res://scripts/house_manager.gd")
 const PERSON_MANAGER_SCRIPT := preload("res://scripts/person_manager.gd")
 const HOUSE_POPUP_SCENE := preload("res://scenes/ui/HousePopup.tscn")
+const INVENTORY_PANEL_SCENE := preload("res://scenes/ui/InventoryPanel.tscn")
 const AUTOSAVE_INTERVAL := 300.0
 
 @onready var _season_label: Label = $HUD/Panel/VBox/SeasonLabel
@@ -30,6 +31,7 @@ var _house_manager: Node = null
 var _person_manager: Node = null
 var _active_popup: Node = null
 var _active_popup_house_id: int = 0
+var _active_inventory_panel: Node = null
 var _save_tween: Tween = null
 
 
@@ -141,10 +143,12 @@ func _on_house_zone_pressed(house_id: int) -> void:
 		_person_manager
 	)
 	_active_popup.settler_requested.connect(_on_settler_requested)
+	_active_popup.person_selected.connect(_on_person_selected)
 	_active_popup.closed.connect(_close_popup)
 
 
 func _close_popup() -> void:
+	_close_inventory_panel()
 	if _active_popup != null:
 		_active_popup.queue_free()
 		_active_popup = null
@@ -160,6 +164,57 @@ func _on_settler_requested(house_id: int) -> void:
 	_update_hud()
 	if _active_popup != null:
 		_active_popup.refresh(_house_manager.get_house(house_id), _food)
+
+
+func _on_person_selected(person_id: int) -> void:
+	_close_inventory_panel()
+	var p = _person_manager.get_person(person_id)
+	if p == null:
+		return
+	var house_data: Dictionary = _house_manager.get_house(p.house_id)
+	_active_inventory_panel = INVENTORY_PANEL_SCENE.instantiate()
+	$HUD.add_child(_active_inventory_panel)
+	_active_inventory_panel.setup(_build_person_snapshot(p, house_data))
+	_active_inventory_panel.item_dropped.connect(_on_item_dropped)
+	_active_inventory_panel.explorer_toggled.connect(_on_explorer_toggled)
+	_active_inventory_panel.closed.connect(_close_inventory_panel)
+
+
+func _close_inventory_panel() -> void:
+	if _active_inventory_panel != null:
+		_active_inventory_panel.queue_free()
+		_active_inventory_panel = null
+
+
+func _on_item_dropped(person_id: int, item_id: String) -> void:
+	_person_manager.drop_item(person_id, item_id)
+	_refresh_inventory_panel(person_id)
+
+
+func _on_explorer_toggled(person_id: int, is_explorer: bool) -> void:
+	_person_manager.set_role(person_id, "explorer" if is_explorer else "villager")
+	_refresh_inventory_panel(person_id)
+
+
+func _refresh_inventory_panel(person_id: int) -> void:
+	if _active_inventory_panel == null:
+		return
+	var p = _person_manager.get_person(person_id)
+	if p == null:
+		return
+	var house_data: Dictionary = _house_manager.get_house(p.house_id)
+	_active_inventory_panel.setup(_build_person_snapshot(p, house_data))
+
+
+func _build_person_snapshot(p: Object, house_data: Dictionary) -> Dictionary:
+	return {
+		"id": p.id,
+		"name": p.name,
+		"role": p.role,
+		"house_name": str(house_data.get("name", "")),
+		"inventory": p.inventory.duplicate(true),
+		"is_explorer": p.is_explorer
+	}
 
 
 func _on_autosave() -> void:

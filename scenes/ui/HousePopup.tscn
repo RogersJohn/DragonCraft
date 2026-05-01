@@ -22,9 +22,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -120.0
-offset_top = -100.0
+offset_top = -150.0
 offset_right = 120.0
-offset_bottom = 100.0
+offset_bottom = 150.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -37,16 +37,24 @@ offset_right = -10.0
 offset_bottom = -8.0
 
 [node name="HouseNameLabel" type="Label" parent="PopupPanel/VBox"]
+layout_mode = 2
 text = "House 1"
 
 [node name="OccupantsLabel" type="Label" parent="PopupPanel/VBox"]
+layout_mode = 2
 text = "1 / 5"
 
 [node name="CostLabel" type="Label" parent="PopupPanel/VBox"]
-text = "Cost: 20 Food"
+layout_mode = 2
+text = "Cost: 50 Food"
 
 [node name="SettlerButton" type="Button" parent="PopupPanel/VBox"]
+layout_mode = 2
 text = "Welcome a Settler"
 
 [node name="ReasonLabel" type="Label" parent="PopupPanel/VBox"]
+layout_mode = 2
 text = ""
+
+[node name="PersonList" type="VBoxContainer" parent="PopupPanel/VBox"]
+layout_mode = 2

@@ -61,12 +61,15 @@ func _apply_data(data: Dictionary) -> void:
 
 
 func _person_from_dict(d: Dictionary) -> Object:
-	return Person.new(
+	var p := Person.new(
 		int(d["id"]),
 		str(d["name"]),
 		int(d["house_id"]),
 		str(d.get("role", "villager"))
 	)
+	for item in d.get("inventory", []):
+		p.inventory.append(item.duplicate())
+	return p
 
 
 func get_population() -> int:
@@ -114,6 +117,21 @@ func _pick_next_name() -> String:
 	var n: String = _name_pool[_next_name_index % _name_pool.size()]
 	_next_name_index += 1
 	return n
+
+
+func drop_item(person_id: int, item_id: String) -> bool:
+	var p := get_person(person_id)
+	if p == null:
+		return false
+	return p.remove_item(item_id)
+
+
+func set_role(person_id: int, role: String) -> void:
+	var p := get_person(person_id)
+	if p == null:
+		return
+	p.role = role
+	p.is_explorer = role == "explorer"
 
 
 func get_explorers() -> Array:

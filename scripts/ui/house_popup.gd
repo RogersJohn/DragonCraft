@@ -3,6 +3,7 @@ extends Control
 const UITheme = preload("res://scripts/ui/ui_theme.gd")
 
 signal settler_requested(house_id: int)
+signal person_selected(person_id: int)
 signal closed
 
 var _house_id: int = 0
@@ -16,6 +17,7 @@ var _person_manager: Node = null
 @onready var _cost_label: Label = $PopupPanel/VBox/CostLabel
 @onready var _settler_button: Button = $PopupPanel/VBox/SettlerButton
 @onready var _reason_label: Label = $PopupPanel/VBox/ReasonLabel
+@onready var _person_list: VBoxContainer = $PopupPanel/VBox/PersonList
 
 
 func _ready() -> void:
@@ -43,6 +45,22 @@ func refresh(house_data: Dictionary, food: float) -> void:
 	_occupants_label.text = "%d / %d" % [occupants, capacity]
 	_settler_button.disabled = reason != ""
 	_reason_label.text = reason
+	_rebuild_person_list()
+
+
+func _rebuild_person_list() -> void:
+	for child in _person_list.get_children():
+		child.free()
+	if _person_manager == null:
+		return
+	for p in _person_manager.get_people_in_house(_house_id):
+		var btn := Button.new()
+		btn.text = "%s  (%s)" % [p.name, p.role]
+		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		btn.flat = false
+		var pid: int = p.id
+		btn.pressed.connect(func(): person_selected.emit(pid))
+		_person_list.add_child(btn)
 
 
 func _get_disable_reason(occupants: int, capacity: int, food: float) -> String:
