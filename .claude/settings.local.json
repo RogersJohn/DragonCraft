@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /c/Users/roger/Documents/GitHub/DragonCraft log --oneline)",
+      "Bash(git -C /c/Users/roger/Documents/GitHub/DragonCraft remote -v)",
+      "Bash(git:*)",
+      "Bash(gh auth:*)",
+      "Bash(gh repo:*)",
+      "Bash(godot --headless --quit)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(godot)",
+      "Bash(del \"C:\\\\Users\\\\roger\\\\Documents\\\\GitHub\\\\DragonCraft\\\\assets\\\\images\\\\First View Village.png.import\")",
+      "Bash(godot project.godot)",
+      "Bash(godot --path .)",
+      "Bash(/c/Users/roger/Desktop/Godot/godot.exe *)",
+      "Bash(\"/c/Users/roger/Desktop/Godot/godot.exe\" --headless --quit)"
+    ]
+  }
+}
