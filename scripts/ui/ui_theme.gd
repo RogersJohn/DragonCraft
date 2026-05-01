@@ -31,3 +31,15 @@ static func apply_gold_button(button: Button, font_size: int = 16) -> void:
 	button.add_theme_color_override("font_color", Color(0.9, 0.72, 0.08))
 	button.add_theme_color_override("font_color_disabled", Color(0.5, 0.4, 0.1))
 	button.add_theme_font_size_override("font_size", font_size)
+
+
+static func apply_invisible_zone(button: Button) -> void:
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0, 0, 0, 0)
+	var hover := StyleBoxFlat.new()
+	hover.bg_color = Color(1.0, 0.85, 0.2, 0.15)
+	var focus := StyleBoxEmpty.new()
+	button.add_theme_stylebox_override("normal", normal)
+	button.add_theme_stylebox_override("hover", hover)
+	button.add_theme_stylebox_override("pressed", hover)
+	button.add_theme_stylebox_override("focus", focus)

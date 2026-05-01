@@ -100,8 +100,6 @@ func get_people_in_house(house_id: int) -> Array:
 func add_settler(house_id: int) -> Object:
 	if _house_manager == null:
 		return null
-	if not SeasonManager.is_population_growth_allowed():
-		return null
 	if get_people_in_house(house_id).size() >= _house_manager.get_capacity(house_id):
 		return null
 	var settler_name := _pick_next_name()

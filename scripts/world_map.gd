@@ -3,6 +3,7 @@ extends Control
 signal enter_village
 signal egg_picked_up(egg_data: Dictionary, person_id: int)
 
+const UITheme = preload("res://scripts/ui/ui_theme.gd")
 const EGG_MANAGER_SCRIPT := preload("res://scripts/egg_manager.gd")
 const EGG_POPUP_SCENE := preload("res://scenes/ui/EggPopup.tscn")
 
@@ -25,7 +26,7 @@ var _nearby_indicator: Label = null
 
 func _ready() -> void:
 	_zone.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	_style_zone()
+	UITheme.apply_invisible_zone(_zone)
 	_zone.button_down.connect(_on_zone_pressed)
 
 	_map_size = get_viewport_rect().size
@@ -108,14 +109,14 @@ func _on_egg_discovered(egg_data: Dictionary) -> void:
 
 func _has_explorer_with_space() -> bool:
 	for e in _explorer_snapshot:
-		if int(e.get("inventory_size", 1)) < 1:
+		if int(e.get("inventory_size", 0)) < 1:
 			return true
 	return false
 
 
 func _get_first_explorer_with_space() -> int:
 	for e in _explorer_snapshot:
-		if int(e.get("inventory_size", 1)) < 1:
+		if int(e.get("inventory_size", 0)) < 1:
 			return int(e.get("id", -1))
 	return -1
 
@@ -149,14 +150,3 @@ func _on_zone_pressed() -> void:
 	_zone.disabled = true
 	enter_village.emit()
 
-
-func _style_zone() -> void:
-	var normal := StyleBoxFlat.new()
-	normal.bg_color = Color(0, 0, 0, 0)
-	var hover := StyleBoxFlat.new()
-	hover.bg_color = Color(1.0, 0.85, 0.2, 0.15)
-	var focus := StyleBoxEmpty.new()
-	_zone.add_theme_stylebox_override("normal", normal)
-	_zone.add_theme_stylebox_override("hover", hover)
-	_zone.add_theme_stylebox_override("pressed", hover)
-	_zone.add_theme_stylebox_override("focus", focus)

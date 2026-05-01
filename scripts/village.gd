@@ -156,6 +156,8 @@ func _close_popup() -> void:
 
 
 func _on_settler_requested(house_id: int) -> void:
+	if not SeasonManager.is_population_growth_allowed():
+		return
 	if _food < float(_house_manager.get_settler_food_cost()):
 		return
 	if _person_manager.add_settler(house_id) == null:
