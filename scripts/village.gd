@@ -9,6 +9,7 @@ const HOUSE_POPUP_SCENE := preload("res://scenes/ui/HousePopup.tscn")
 const AUTOSAVE_INTERVAL := 300.0
 
 @onready var _season_label: Label = $HUD/Panel/VBox/SeasonLabel
+@onready var _day_label: Label = $HUD/Panel/VBox/DayLabel
 @onready var _food_label: Label = $HUD/Panel/VBox/FoodLabel
 @onready var _gold_label: Label = $HUD/Panel/VBox/GoldLabel
 @onready var _wood_label: Label = $HUD/Panel/VBox/WoodLabel
@@ -57,8 +58,10 @@ func _ready() -> void:
 	add_child(autosave_timer)
 	SeasonManager.season_changed.connect(_on_season_changed)
 	SeasonManager.season_tick.connect(_on_season_tick)
+	GameClock.day_changed.connect(_on_day_changed)
 	_on_season_changed(SeasonManager.get_current_season())
 	_update_season_label(SeasonManager.get_current_season(), SeasonManager.get_time_remaining())
+	_day_label.text = "📅 Day %d" % GameClock.get_current_day()
 	_update_hud()
 
 
@@ -118,6 +121,10 @@ func _on_season_tick(time_remaining: float) -> void:
 	_update_season_label(SeasonManager.get_current_season(), time_remaining)
 
 
+func _on_day_changed(day_number: int) -> void:
+	_day_label.text = "📅 Day %d" % day_number
+
+
 func _on_house_zone_pressed(house_id: int) -> void:
 	_close_popup()
 	_active_popup = HOUSE_POPUP_SCENE.instantiate()
@@ -126,7 +133,8 @@ func _on_house_zone_pressed(house_id: int) -> void:
 	_active_popup.setup(
 		_house_manager.get_house(house_id),
 		_food,
-		_house_manager.get_settler_food_cost()
+		_house_manager.get_settler_food_cost(),
+		_house_manager
 	)
 	_active_popup.settler_requested.connect(_on_settler_requested)
 	_active_popup.closed.connect(_close_popup)
@@ -164,7 +172,11 @@ func _build_save_state() -> Dictionary:
 	var houses := []
 	for i in range(1, 6):
 		var h: Dictionary = _house_manager.get_house(i)
-		houses.append({"id": int(h["id"]), "occupants": int(h["occupants"])})
+		houses.append({
+			"id": int(h["id"]),
+			"occupants": int(h["occupants"]),
+			"founding_day": int(h.get("founding_day", 0))
+		})
 	return {
 		"food": _food,
 		"gold": _gold,
@@ -173,6 +185,7 @@ func _build_save_state() -> Dictionary:
 		"houses": houses,
 		"season_index": SeasonManager.get_season_index(),
 		"season_elapsed": SeasonManager.get_elapsed(),
+		"game_clock_elapsed": GameClock.get_elapsed_seconds(),
 		"current_scene": "village"
 	}
 
@@ -185,7 +198,10 @@ func restore_state(state: Dictionary) -> void:
 		var h: Dictionary = _house_manager.get_house(int(h_state["id"]))
 		if not h.is_empty():
 			h["occupants"] = int(h_state["occupants"])
+			h["founding_day"] = int(h_state.get("founding_day", 0))
 	_people = _house_manager.get_total_population()
+	GameClock.restore(float(state.get("game_clock_elapsed", 0.0)))
+	_day_label.text = "📅 Day %d" % GameClock.get_current_day()
 	_update_hud()
 
 

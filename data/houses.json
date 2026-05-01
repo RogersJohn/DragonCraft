@@ -1,10 +1,12 @@
 {
   "houses": [
-    {"id": 1, "name": "House 1", "capacity": 5, "occupants": 1},
-    {"id": 2, "name": "House 2", "capacity": 5, "occupants": 1},
-    {"id": 3, "name": "House 3", "capacity": 5, "occupants": 1},
-    {"id": 4, "name": "House 4", "capacity": 5, "occupants": 1},
-    {"id": 5, "name": "House 5", "capacity": 5, "occupants": 1}
+    {"id": 1, "name": "House 1", "capacity": 5, "occupants": 1, "founding_day": 0},
+    {"id": 2, "name": "House 2", "capacity": 5, "occupants": 1, "founding_day": 0},
+    {"id": 3, "name": "House 3", "capacity": 5, "occupants": 1, "founding_day": 0},
+    {"id": 4, "name": "House 4", "capacity": 5, "occupants": 1, "founding_day": 0},
+    {"id": 5, "name": "House 5", "capacity": 5, "occupants": 1, "founding_day": 0}
   ],
-  "settler_food_cost": 20
+  "settler_food_cost": 50,
+  "day_duration_seconds": 120,
+  "settler_unlock_day": 10
 }

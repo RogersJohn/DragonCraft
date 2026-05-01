@@ -6,7 +6,8 @@ signal settler_requested(house_id: int)
 signal closed
 
 var _house_id: int = 0
-var _settler_cost: int = 20
+var _settler_cost: int = 50
+var _house_manager: Node = null
 
 @onready var _close_button: Button = $CloseButton
 @onready var _name_label: Label = $PopupPanel/VBox/HouseNameLabel
@@ -22,9 +23,10 @@ func _ready() -> void:
 	UITheme.apply_gold_button(_settler_button)
 
 
-func setup(house_data: Dictionary, food: float, settler_cost: int) -> void:
+func setup(house_data: Dictionary, food: float, settler_cost: int, house_manager: Node) -> void:
 	_house_id = int(house_data["id"])
 	_settler_cost = settler_cost
+	_house_manager = house_manager
 	_name_label.text = str(house_data["name"])
 	_cost_label.text = "Cost: %d Food" % settler_cost
 	refresh(house_data, food)
@@ -33,13 +35,15 @@ func setup(house_data: Dictionary, food: float, settler_cost: int) -> void:
 func refresh(house_data: Dictionary, food: float) -> void:
 	var occupants := int(house_data["occupants"])
 	var capacity := int(house_data["capacity"])
-	_occupants_label.text = "%d / %d" % [occupants, capacity]
 	var reason := _get_disable_reason(occupants, capacity, food)
+	_occupants_label.text = "%d / %d" % [occupants, capacity]
 	_settler_button.disabled = reason != ""
 	_reason_label.text = reason
 
 
 func _get_disable_reason(occupants: int, capacity: int, food: float) -> String:
+	if _house_manager != null and not _house_manager.is_house_unlocked(_house_id):
+		return "Available on day %d" % _house_manager.get_unlock_day(_house_id)
 	if not SeasonManager.is_population_growth_allowed():
 		return "Winter — no growth"
 	if food < float(_settler_cost):
