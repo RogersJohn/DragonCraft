@@ -217,6 +217,18 @@ func _build_person_snapshot(p: Object, house_data: Dictionary) -> Dictionary:
 	}
 
 
+func get_explorer_snapshot() -> Array:
+	return _person_manager.get_explorer_snapshot()
+
+
+func apply_pending_pickups(pickups: Array) -> void:
+	for pickup in pickups:
+		_person_manager.apply_egg_pickup(
+			pickup.get("egg_data", {}),
+			int(pickup.get("person_id", -1))
+		)
+
+
 func _on_autosave() -> void:
 	_do_save("auto")
 

@@ -3,6 +3,7 @@ extends Node
 const SAVE_DIR := "user://saves/"
 const MANUAL_SAVE_PATH := SAVE_DIR + "manualsave.json"
 const AUTOSAVE_INDEX_PATH := SAVE_DIR + "autosave_index.json"
+const EGGS_SAVE_PATH := SAVE_DIR + "eggs.json"
 const MAX_AUTOSAVE_SLOTS := 10
 
 
@@ -83,6 +84,25 @@ func _read_json(path: String) -> Dictionary:
 		push_error("SaveManager: failed to parse JSON in: %s" % path)
 		return {}
 	return parsed
+
+
+func save_eggs(eggs: Array) -> void:
+	_ensure_save_dir()
+	_write_json(EGGS_SAVE_PATH, {"eggs": eggs})
+
+
+func load_eggs() -> Array:
+	if not FileAccess.file_exists(EGGS_SAVE_PATH):
+		return []
+	var d: Dictionary = _read_json(EGGS_SAVE_PATH)
+	var result = d.get("eggs", [])
+	if result is Array:
+		return result
+	return []
+
+
+func has_eggs_save() -> bool:
+	return FileAccess.file_exists(EGGS_SAVE_PATH)
 
 
 func _get_next_autosave_index() -> int:

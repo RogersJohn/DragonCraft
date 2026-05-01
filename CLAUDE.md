@@ -88,7 +88,7 @@ For day-to-day development, open `project.godot` in the Godot 4 editor.
 
 - **Phase 1** — Title screen, crossfade, village HUD, resource tick: **complete**
 - **Phase 2** — Season system, house menus, people resource, save/load, UI theme refactor: **complete**
-- **Phase 3** — Not started
+- **Phase 3** — In progress (explorer sprite, egg discovery/pickup/flag system)
 
 ## Asset Notes
 

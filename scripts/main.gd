@@ -8,6 +8,8 @@ const FADE_HALF := 0.75
 var _overlay: ColorRect
 var _current: Node
 var _pending_state: Dictionary = {}
+var _explorer_snapshot: Array = []
+var _pending_egg_pickups: Array = []
 
 
 func _ready() -> void:
@@ -41,21 +43,49 @@ func _on_continue_requested() -> void:
 			int(state.get("season_index", 0)),
 			float(state.get("season_elapsed", 0.0))
 		)
+		_explorer_snapshot = _extract_explorer_snapshot(state)
 	_crossfade_to(_spawn_world_map)
+
+
+func _extract_explorer_snapshot(state: Dictionary) -> Array:
+	var result := []
+	var pm_data: Dictionary = state.get("person_manager", {})
+	for p in pm_data.get("people", []):
+		if str(p.get("role", "")) == "explorer":
+			var inv = p.get("inventory", [])
+			var inv_size: int = inv.size() if inv is Array else 0
+			result.append({
+				"id": int(p.get("id", 0)),
+				"name": str(p.get("name", "")),
+				"inventory_size": inv_size
+			})
+	return result
 
 
 func _spawn_world_map() -> void:
 	_current = WORLD_MAP_SCENE.instantiate()
 	add_child(_current)
 	move_child(_current, 0)
+	_current.init_explorer(_explorer_snapshot)
 	_current.enter_village.connect(func(): _crossfade_to(_spawn_village))
+	_current.egg_picked_up.connect(_on_egg_picked_up)
+
+
+func _on_egg_picked_up(egg_data: Dictionary, person_id: int) -> void:
+	_pending_egg_pickups.append({"egg_data": egg_data, "person_id": person_id})
 
 
 func _spawn_village() -> void:
 	_current = VILLAGE_SCENE.instantiate()
 	add_child(_current)
 	move_child(_current, 0)
-	_current.back_to_map.connect(func(): _crossfade_to(_spawn_world_map))
+	_current.back_to_map.connect(func():
+		_explorer_snapshot = _current.get_explorer_snapshot()
+		_crossfade_to(_spawn_world_map)
+	)
 	if not _pending_state.is_empty():
 		_current.restore_state(_pending_state)
 		_pending_state = {}
+	if not _pending_egg_pickups.is_empty():
+		_current.apply_pending_pickups(_pending_egg_pickups)
+		_pending_egg_pickups = []

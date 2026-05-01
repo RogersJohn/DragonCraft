@@ -134,6 +134,31 @@ func set_role(person_id: int, role: String) -> void:
 	p.is_explorer = role == "explorer"
 
 
+func get_explorer_snapshot() -> Array:
+	var result := []
+	for p in _people:
+		if p.is_explorer:
+			result.append({
+				"id": p.id,
+				"name": p.name,
+				"inventory_size": p.inventory.size()
+			})
+	return result
+
+
+func apply_egg_pickup(egg_data: Dictionary, person_id: int) -> void:
+	var p := get_person(person_id)
+	if p == null:
+		return
+	var item := {
+		"type": "egg",
+		"id": str(egg_data.get("id", "")),
+		"species": str(egg_data.get("species", "unknown")),
+		"found_on_day": GameClock.get_current_day()
+	}
+	p.add_item(item)
+
+
 func get_explorers() -> Array:
 	var result := []
 	for p in _people:

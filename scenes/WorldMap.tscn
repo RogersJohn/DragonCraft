@@ -30,3 +30,25 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_default_cursor_shape = 2
 text = ""
+
+[node name="ExplorerSprite" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 20.0
+offset_bottom = 20.0
+color = Color(1, 0.5, 0, 1)
+visible = false
+
+[node name="NoExplorerLabel" type="Label" parent="."]
+anchors_preset = 2
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = -30.0
+offset_right = 260.0
+offset_bottom = -8.0
+grow_vertical = 0
+text = "No explorer assigned"
