@@ -14,7 +14,10 @@
       "Bash(godot --path .)",
       "Bash(/c/Users/roger/Desktop/Godot/godot.exe *)",
       "Bash(\"/c/Users/roger/Desktop/Godot/godot.exe\" --headless --quit)",
-      "Bash(\"C:\\\\Users\\\\roger\\\\Desktop\\\\Godot\\\\godot.exe\" --headless --quit)"
+      "Bash(\"C:\\\\Users\\\\roger\\\\Desktop\\\\Godot\\\\godot.exe\" --headless --quit)",
+      "Bash(start \"\" \"C:\\\\Users\\\\roger\\\\Desktop\\\\Godot\\\\godot.exe\" project.godot)",
+      "Bash(taskkill /IM godot.exe /F)",
+      "Bash(start \"\" \"C:\\\\Users\\\\roger\\\\Desktop\\\\Godot\\\\godot.exe\" --path \"C:\\\\Users\\\\roger\\\\Documents\\\\GitHub\\\\DragonCraft\")"
     ]
   }
 }
