@@ -25,6 +25,7 @@ config/icon="res://assets/images/ui/icon.svg"
 SeasonManager="*res://scripts/season_manager.gd"
 SaveManager="*res://scripts/save_manager.gd"
 GameClock="*res://scripts/game_clock.gd"
+TimeController="*res://scripts/time_controller.gd"
 
 [display]
 

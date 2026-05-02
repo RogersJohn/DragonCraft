@@ -3,10 +3,12 @@ extends Node
 const TITLE_SCREEN_SCENE := preload("res://scenes/TitleScreen.tscn")
 const WORLD_MAP_SCENE := preload("res://scenes/WorldMap.tscn")
 const VILLAGE_SCENE := preload("res://scenes/Village.tscn")
+const TIME_CONTROLS_SCENE := preload("res://scenes/ui/TimeControls.tscn")
 const FADE_HALF := 0.75
 
 var _overlay: ColorRect
 var _current: Node
+var _time_controls: Node = null
 var _pending_state: Dictionary = {}
 var _explorer_snapshot: Array = []
 var _pending_egg_pickups: Array = []
@@ -14,7 +16,14 @@ var _pending_egg_pickups: Array = []
 
 func _ready() -> void:
 	_overlay = $Overlay
+	_time_controls = TIME_CONTROLS_SCENE.instantiate()
+	add_child(_time_controls)
 	_spawn_title_screen()
+
+
+func _ensure_overlay_on_top() -> void:
+	move_child(_overlay, get_child_count() - 1)
+	move_child(_time_controls, get_child_count() - 2)
 
 
 func _crossfade_to(spawn_fn: Callable) -> void:
@@ -30,7 +39,9 @@ func _crossfade_to(spawn_fn: Callable) -> void:
 func _spawn_title_screen() -> void:
 	_current = TITLE_SCREEN_SCENE.instantiate()
 	add_child(_current)
-	move_child(_overlay, get_child_count() - 1)
+	_ensure_overlay_on_top()
+	_time_controls.hide_controls()
+	TimeController.pause()
 	_current.scene_transition.connect(func(): _crossfade_to(_spawn_world_map))
 	_current.continue_requested.connect(_on_continue_requested)
 
@@ -66,9 +77,12 @@ func _spawn_world_map() -> void:
 	_current = WORLD_MAP_SCENE.instantiate()
 	add_child(_current)
 	move_child(_current, 0)
+	_ensure_overlay_on_top()
 	_current.init_explorer(_explorer_snapshot)
 	_current.enter_village.connect(func(): _crossfade_to(_spawn_village))
 	_current.egg_picked_up.connect(_on_egg_picked_up)
+	_time_controls.show_controls()
+	TimeController.resume()
 
 
 func _on_egg_picked_up(egg_data: Dictionary, person_id: int) -> void:
@@ -79,6 +93,8 @@ func _spawn_village() -> void:
 	_current = VILLAGE_SCENE.instantiate()
 	add_child(_current)
 	move_child(_current, 0)
+	_ensure_overlay_on_top()
+	_time_controls.show_controls()
 	_current.back_to_map.connect(func():
 		_explorer_snapshot = _current.get_explorer_snapshot()
 		_crossfade_to(_spawn_world_map)

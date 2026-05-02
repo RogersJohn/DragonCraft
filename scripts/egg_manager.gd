@@ -27,14 +27,15 @@ var _explorer_node: Node = null
 var _map_size: Vector2 = Vector2(1280.0, 720.0)
 var _markers: Dictionary = {}
 var _initialized: bool = false
+var _check_timer: Timer = null
 
 
 func _ready() -> void:
-	var check_timer := Timer.new()
-	check_timer.wait_time = 0.5
-	check_timer.autostart = true
-	check_timer.timeout.connect(_on_discovery_check)
-	add_child(check_timer)
+	_check_timer = Timer.new()
+	_check_timer.wait_time = 0.5
+	_check_timer.autostart = true
+	_check_timer.timeout.connect(_on_discovery_check)
+	add_child(_check_timer)
 
 
 func init(map_size: Vector2, explorer_node: Node) -> void:
@@ -167,6 +168,11 @@ func _roll_species() -> String:
 		if r <= cumulative:
 			return str(SPECIES[i])
 	return str(SPECIES[0])
+
+
+func set_paused(paused: bool) -> void:
+	if _check_timer != null:
+		_check_timer.paused = paused
 
 
 func flag_egg(egg_id: String) -> void:

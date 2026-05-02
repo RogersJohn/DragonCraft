@@ -22,6 +22,7 @@ var _map_size: Vector2 = Vector2(1280.0, 720.0)
 var _village_pos: Vector2 = Vector2.ZERO
 var _explore_radius: float = 0.0
 var _nearby_indicator: Label = null
+var _explorer_can_move: bool = true
 
 
 func _ready() -> void:
@@ -48,6 +49,9 @@ func _ready() -> void:
 	_egg_manager.init(_map_size, _explorer_sprite)
 	_egg_manager.egg_discovered.connect(_on_egg_discovered)
 	_egg_manager.nearby_changed.connect(_on_nearby_changed)
+	TimeController.speed_changed.connect(_on_speed_changed)
+	_explorer_can_move = not TimeController.is_paused()
+	_egg_manager.set_paused(TimeController.is_paused())
 
 
 func init_explorer(snapshot: Array) -> void:
@@ -61,6 +65,8 @@ func _process(delta: float) -> void:
 	if not _explorer_sprite.visible:
 		return
 	if _active_egg_popup != null:
+		return
+	if not _explorer_can_move:
 		return
 	var move_x := 0.0
 	var move_y := 0.0
@@ -79,6 +85,11 @@ func _process(delta: float) -> void:
 	_explorer_sprite.position = _clamp_to_bounds(new_pos)
 	if _nearby_indicator != null:
 		_nearby_indicator.position = _explorer_sprite.position + Vector2(2.0, -22.0)
+
+
+func _on_speed_changed(multiplier: float, paused: bool) -> void:
+	_explorer_can_move = not paused
+	_egg_manager.set_paused(paused)
 
 
 func _clamp_to_bounds(pos: Vector2) -> Vector2:

@@ -3,19 +3,23 @@ extends Node
 signal season_changed(season_data: Dictionary)
 signal season_tick(time_remaining: float)
 
+const BASE_TICK := 1.0
+
 var _seasons: Array = []
 var _season_duration: float = 900.0
 var _season_index: int = 0
 var _elapsed: float = 0.0
+var _timer: Timer = null
 
 
 func _ready() -> void:
 	_load_data()
-	var timer := Timer.new()
-	timer.wait_time = 1.0
-	timer.autostart = true
-	timer.timeout.connect(_on_tick)
-	add_child(timer)
+	_timer = Timer.new()
+	_timer.wait_time = BASE_TICK
+	_timer.autostart = true
+	_timer.timeout.connect(_on_tick)
+	add_child(_timer)
+	TimeController.speed_changed.connect(_on_speed_changed)
 
 
 func _load_data() -> void:
@@ -43,6 +47,14 @@ func _on_tick() -> void:
 		_elapsed = 0.0
 		season_changed.emit(get_current_season())
 	season_tick.emit(_season_duration - _elapsed)
+
+
+func _on_speed_changed(multiplier: float, paused: bool) -> void:
+	if paused:
+		_timer.paused = true
+	else:
+		_timer.paused = false
+		_timer.wait_time = BASE_TICK / multiplier
 
 
 func get_current_season() -> Dictionary:

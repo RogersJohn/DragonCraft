@@ -27,6 +27,7 @@ var _base_tick_food: float = 0.0
 var _base_tick_gold: float = 0.0
 var _base_tick_wood: float = 0.0
 var _tick_multiplier: float = 1.0
+var _base_tick_interval: float = 5.0
 var _house_manager: Node = null
 var _person_manager: Node = null
 var _active_popup: Node = null
@@ -48,7 +49,8 @@ func _ready() -> void:
 	_base_tick_food = res.food.tick_amount
 	_base_tick_gold = res.gold.tick_amount
 	_base_tick_wood = res.wood.tick_amount
-	_timer.wait_time = res.food.tick_interval_seconds
+	_base_tick_interval = res.food.tick_interval_seconds
+	_timer.wait_time = _base_tick_interval
 	_timer.timeout.connect(_on_tick)
 	_timer.start()
 	_save_label.add_theme_color_override("font_color", Color(0.9, 0.72, 0.08))
@@ -64,6 +66,8 @@ func _ready() -> void:
 	SeasonManager.season_changed.connect(_on_season_changed)
 	SeasonManager.season_tick.connect(_on_season_tick)
 	GameClock.day_changed.connect(_on_day_changed)
+	TimeController.speed_changed.connect(_on_speed_changed)
+	_on_speed_changed(TimeController.get_speed_multiplier(), TimeController.is_paused())
 	_on_season_changed(SeasonManager.get_current_season())
 	_update_season_label(SeasonManager.get_current_season(), SeasonManager.get_time_remaining())
 	_day_label.text = "📅 Day %d" % GameClock.get_current_day()
@@ -101,6 +105,15 @@ func _connect_house_zones() -> void:
 		var zone: Button = get_node("House%d" % i)
 		var id := i
 		zone.pressed.connect(func(): _on_house_zone_pressed(id))
+
+
+func _on_speed_changed(multiplier: float, paused: bool) -> void:
+	# Auto-save timer is excluded — it runs on real time regardless of speed
+	if paused:
+		_timer.paused = true
+	else:
+		_timer.paused = false
+		_timer.wait_time = _base_tick_interval / multiplier
 
 
 func _on_tick() -> void:
@@ -257,6 +270,8 @@ func _build_save_state() -> Dictionary:
 		"season_index": SeasonManager.get_season_index(),
 		"season_elapsed": SeasonManager.get_elapsed(),
 		"game_clock_elapsed": GameClock.get_elapsed_seconds(),
+		"speed_multiplier": TimeController.get_speed_multiplier(),
+		"is_paused": TimeController.is_paused(),
 		"current_scene": "village"
 	}
 
@@ -272,6 +287,10 @@ func restore_state(state: Dictionary) -> void:
 	_person_manager.restore(state.get("person_manager", {}))
 	GameClock.restore(float(state.get("game_clock_elapsed", 0.0)))
 	_day_label.text = "📅 Day %d" % GameClock.get_current_day()
+	var saved_speed := float(state.get("speed_multiplier", 1.0))
+	TimeController.set_speed(saved_speed if saved_speed > 0.0 else 1.0)
+	if bool(state.get("is_paused", false)):
+		TimeController.pause()
 	_update_hud()
 
 

@@ -2,18 +2,22 @@ extends Node
 
 signal day_changed(day_number: int)
 
+const BASE_TICK := 1.0
+
 var _day_duration_seconds: float = 120.0
 var _elapsed_seconds: float = 0.0
 var _last_day: int = 0
+var _tick_timer: Timer = null
 
 
 func _ready() -> void:
 	_load_day_duration()
-	var tick_timer := Timer.new()
-	tick_timer.wait_time = 1.0
-	tick_timer.autostart = true
-	tick_timer.timeout.connect(_on_tick)
-	add_child(tick_timer)
+	_tick_timer = Timer.new()
+	_tick_timer.wait_time = BASE_TICK
+	_tick_timer.autostart = true
+	_tick_timer.timeout.connect(_on_tick)
+	add_child(_tick_timer)
+	TimeController.speed_changed.connect(_on_speed_changed)
 
 
 func _load_day_duration() -> void:
@@ -33,6 +37,14 @@ func _on_tick() -> void:
 	if current_day != _last_day:
 		_last_day = current_day
 		day_changed.emit(current_day)
+
+
+func _on_speed_changed(multiplier: float, paused: bool) -> void:
+	if paused:
+		_tick_timer.paused = true
+	else:
+		_tick_timer.paused = false
+		_tick_timer.wait_time = BASE_TICK / multiplier
 
 
 func get_current_day() -> int:
