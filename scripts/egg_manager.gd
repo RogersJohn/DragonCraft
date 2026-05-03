@@ -10,6 +10,15 @@ const TOTAL_EGGS := 10
 const SPECIES: Array = ["forest_drake", "stone_drake", "ember_drake", "sea_drake", "gold_drake"]
 const SPECIES_WEIGHTS: Array = [0.30, 0.30, 0.20, 0.15, 0.05]
 
+const SPECIES_COLOURS := {
+	"forest_drake": Color(0.2, 0.6, 0.15),
+	"stone_drake":  Color(0.5, 0.45, 0.38),
+	"ember_drake":  Color(0.85, 0.25, 0.1),
+	"sea_drake":    Color(0.1, 0.4, 0.75),
+	"gold_drake":   Color(0.85, 0.7, 0.1),
+	"unknown":      Color(0.4, 0.4, 0.4)
+}
+
 # Biome regions as normalised [x_min, y_min, x_max, y_max]
 const BIOMES: Dictionary = {
 	"plains":    [0.20, 0.40, 0.70, 0.75],
@@ -26,6 +35,7 @@ var _eggs: Array = []
 var _explorer_node: Node = null
 var _map_size: Vector2 = Vector2(1280.0, 720.0)
 var _markers: Dictionary = {}
+var _pickup_markers: Dictionary = {}
 var _initialized: bool = false
 var _check_timer: Timer = null
 
@@ -114,13 +124,35 @@ func _rebuild_markers() -> void:
 
 
 func _add_flag_marker(egg: Dictionary) -> void:
-	var marker := ColorRect.new()
-	marker.color = Color(0.9, 0.1, 0.1)
-	marker.size = Vector2(8.0, 8.0)
 	var screen_pos: Vector2 = _norm_to_screen(Vector2(float(egg["position_x"]), float(egg["position_y"])))
-	marker.position = screen_pos - Vector2(4.0, 4.0)
-	get_parent().add_child(marker)
-	_markers[str(egg["id"])] = marker
+	var container := Control.new()
+	container.position = screen_pos + Vector2(-10.0, -20.0)
+	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var shadow := Label.new()
+	shadow.text = "🚩"
+	shadow.add_theme_font_size_override("font_size", 20)
+	shadow.add_theme_color_override("font_color", Color(0, 0, 0))
+	shadow.position = Vector2(1.0, 1.0)
+	var label := Label.new()
+	label.text = "🚩"
+	label.add_theme_font_size_override("font_size", 20)
+	get_parent().add_child(container)
+	container.add_child(shadow)
+	container.add_child(label)
+	_markers[str(egg["id"])] = container
+
+
+func _add_pickup_marker(egg: Dictionary) -> void:
+	var species: String = str(egg.get("species", "unknown"))
+	var colour: Color = SPECIES_COLOURS.get(species, SPECIES_COLOURS["unknown"])
+	colour.a = 0.6
+	var dot := ColorRect.new()
+	dot.color = colour
+	dot.size = Vector2(10.0, 10.0)
+	var screen_pos: Vector2 = _norm_to_screen(Vector2(float(egg["position_x"]), float(egg["position_y"])))
+	dot.position = screen_pos - Vector2(5.0, 5.0)
+	get_parent().add_child(dot)
+	_pickup_markers[str(egg["id"])] = dot
 
 
 func _norm_to_screen(norm: Vector2) -> Vector2:
@@ -194,5 +226,6 @@ func pickup_egg(egg_id: String) -> void:
 				if is_instance_valid(_markers[egg_id]):
 					_markers[egg_id].queue_free()
 				_markers.erase(egg_id)
+			_add_pickup_marker(egg)
 			SaveManager.save_eggs(_eggs)
 			return

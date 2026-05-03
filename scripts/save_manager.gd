@@ -105,6 +105,22 @@ func has_eggs_save() -> bool:
 	return FileAccess.file_exists(EGGS_SAVE_PATH)
 
 
+func clear_all_saves() -> void:
+	_delete_file(MANUAL_SAVE_PATH)
+	for i in range(1, MAX_AUTOSAVE_SLOTS + 1):
+		_delete_file(SAVE_DIR + "autosave_%02d.json" % i)
+	_delete_file(AUTOSAVE_INDEX_PATH)
+	_delete_file(EGGS_SAVE_PATH)
+
+
+func _delete_file(path: String) -> void:
+	if not FileAccess.file_exists(path):
+		return
+	var err := DirAccess.remove_absolute(path)
+	if err != OK:
+		push_error("SaveManager: failed to delete: %s" % path)
+
+
 func _get_next_autosave_index() -> int:
 	if not FileAccess.file_exists(AUTOSAVE_INDEX_PATH):
 		return 1

@@ -42,8 +42,15 @@ func _spawn_title_screen() -> void:
 	_ensure_overlay_on_top()
 	_time_controls.hide_controls()
 	TimeController.pause()
-	_current.scene_transition.connect(func(): _crossfade_to(_spawn_world_map))
+	_current.new_game_requested.connect(_on_new_game_requested)
 	_current.continue_requested.connect(_on_continue_requested)
+
+
+func _on_new_game_requested() -> void:
+	SaveManager.clear_all_saves()
+	TimeController.set_speed(1.0)
+	TimeController.resume()
+	_crossfade_to(_spawn_world_map)
 
 
 func _on_continue_requested() -> void:
