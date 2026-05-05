@@ -33,7 +33,10 @@ var _person_manager: Node = null
 var _active_popup: Node = null
 var _active_popup_house_id: int = 0
 var _active_inventory_panel: Node = null
+var _active_inventory_person_id: int = -1
 var _save_tween: Tween = null
+var _notify_label: Label = null
+var _notify_tween: Tween = null
 
 
 func _ready() -> void:
@@ -68,6 +71,17 @@ func _ready() -> void:
 	GameClock.day_changed.connect(_on_day_changed)
 	TimeController.speed_changed.connect(_on_speed_changed)
 	_on_speed_changed(TimeController.get_speed_multiplier(), TimeController.is_paused())
+	_person_manager.role_changed.connect(_on_role_changed)
+	_notify_label = Label.new()
+	_notify_label.add_theme_color_override("font_color", Color(0.9, 0.72, 0.08))
+	_notify_label.add_theme_font_size_override("font_size", 14)
+	_notify_label.modulate.a = 0.0
+	_notify_label.anchor_left = 0.0
+	_notify_label.anchor_right = 1.0
+	_notify_label.offset_top = 240.0
+	_notify_label.offset_bottom = 265.0
+	_notify_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	$HUD.add_child(_notify_label)
 	_on_season_changed(SeasonManager.get_current_season())
 	_update_season_label(SeasonManager.get_current_season(), SeasonManager.get_time_remaining())
 	_day_label.text = "📅 Day %d" % GameClock.get_current_day()
@@ -143,6 +157,15 @@ func _on_day_changed(day_number: int) -> void:
 	_day_label.text = "📅 Day %d" % day_number
 
 
+func _on_role_changed(person_id: int, new_role: String) -> void:
+	if new_role == "explorer" and _active_inventory_person_id == person_id:
+		_close_inventory_panel()
+	if _active_popup != null:
+		var p = _person_manager.get_person(person_id)
+		if p != null and p.house_id == _active_popup_house_id:
+			_active_popup.refresh(_house_manager.get_house(_active_popup_house_id), _food)
+
+
 func _on_house_zone_pressed(house_id: int) -> void:
 	_close_popup()
 	_active_popup = HOUSE_POPUP_SCENE.instantiate()
@@ -188,8 +211,10 @@ func _on_person_selected(person_id: int) -> void:
 		return
 	var house_data: Dictionary = _house_manager.get_house(p.house_id)
 	_active_inventory_panel = INVENTORY_PANEL_SCENE.instantiate()
+	_active_inventory_person_id = person_id
 	$HUD.add_child(_active_inventory_panel)
 	_active_inventory_panel.setup(_build_person_snapshot(p, house_data))
+	_active_inventory_panel.watch_for_explorer_promotion(_person_manager)
 	_active_inventory_panel.item_dropped.connect(_on_item_dropped)
 	_active_inventory_panel.explorer_toggled.connect(_on_explorer_toggled)
 	_active_inventory_panel.closed.connect(_close_inventory_panel)
@@ -199,6 +224,7 @@ func _close_inventory_panel() -> void:
 	if _active_inventory_panel != null:
 		_active_inventory_panel.queue_free()
 		_active_inventory_panel = null
+	_active_inventory_person_id = -1
 
 
 func _on_item_dropped(person_id: int, item_id: String) -> void:
@@ -242,6 +268,30 @@ func apply_pending_pickups(pickups: Array) -> void:
 			pickup.get("egg_data", {}),
 			int(pickup.get("person_id", -1))
 		)
+
+
+func receive_explorer_returns(explorer_data: Array, _egg_transfers: Array) -> void:
+	for e in explorer_data:
+		var pid: int = int(e.get("id", -1))
+		if pid == -1:
+			continue
+		var p = _person_manager.get_person(pid)
+		if p == null:
+			continue
+		_person_manager.set_role(pid, "villager")
+		_show_return_notification(str(e.get("name", "Explorer")))
+
+
+func _show_return_notification(explorer_name: String) -> void:
+	if _notify_label == null:
+		return
+	if _notify_tween != null:
+		_notify_tween.kill()
+	_notify_label.text = "%s has returned to the village!" % explorer_name
+	_notify_label.modulate.a = 1.0
+	_notify_tween = create_tween()
+	_notify_tween.tween_interval(3.0)
+	_notify_tween.tween_property(_notify_label, "modulate:a", 0.0, 1.0)
 
 
 func _on_autosave() -> void:
