@@ -54,13 +54,22 @@ func _rebuild_person_list() -> void:
 	if _person_manager == null:
 		return
 	for p in _person_manager.get_people_in_house(_house_id):
-		var btn := Button.new()
-		btn.text = "%s  (%s)" % [p.name, p.role]
-		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		btn.flat = false
-		var pid: int = p.id
-		btn.pressed.connect(func(): person_selected.emit(pid))
-		_person_list.add_child(btn)
+		if p.is_explorer:
+			var note := RichTextLabel.new()
+			note.bbcode_enabled = true
+			note.fit_content = true
+			note.scroll_active = false
+			note.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			note.text = "[color=#e6b814][i]%s — out exploring[/i][/color]" % p.name
+			_person_list.add_child(note)
+		else:
+			var btn := Button.new()
+			btn.text = "%s  (%s)" % [p.name, p.role]
+			btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			btn.flat = false
+			var pid: int = p.id
+			btn.pressed.connect(func(): person_selected.emit(pid))
+			_person_list.add_child(btn)
 
 
 func _get_disable_reason(occupants: int, capacity: int, food: float) -> String:

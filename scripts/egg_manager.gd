@@ -202,6 +202,14 @@ func _roll_species() -> String:
 	return str(SPECIES[0])
 
 
+func get_picked_up_eggs_by_explorer() -> Array:
+	var result := []
+	for egg in _eggs:
+		if bool(egg.get("picked_up", false)):
+			result.append(egg.duplicate())
+	return result
+
+
 func set_paused(paused: bool) -> void:
 	if _check_timer != null:
 		_check_timer.paused = paused

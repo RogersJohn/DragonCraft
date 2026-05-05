@@ -1,6 +1,6 @@
 extends Control
 
-signal enter_village
+signal enter_village(egg_transfers: Array)
 signal egg_picked_up(egg_data: Dictionary, person_id: int)
 
 const UITheme = preload("res://scripts/ui/ui_theme.gd")
@@ -23,6 +23,7 @@ var _village_pos: Vector2 = Vector2.ZERO
 var _explore_radius: float = 0.0
 var _nearby_indicator: Label = null
 var _explorer_can_move: bool = true
+var _explorer_name_label: Label = null
 
 
 func _ready() -> void:
@@ -59,6 +60,18 @@ func init_explorer(snapshot: Array) -> void:
 	var has_explorer: bool = snapshot.size() > 0
 	_explorer_sprite.visible = has_explorer
 	_no_explorer_label.visible = not has_explorer
+	if has_explorer:
+		var explorer_name: String = str(snapshot[0].get("name", "Explorer"))
+		if _explorer_name_label == null:
+			_explorer_name_label = Label.new()
+			_explorer_name_label.add_theme_font_size_override("font_size", 12)
+			_explorer_name_label.add_theme_color_override("font_color", Color(0.9, 0.72, 0.08))
+			add_child(_explorer_name_label)
+		_explorer_name_label.text = explorer_name
+		_explorer_name_label.position = _explorer_sprite.position + Vector2(-10.0, -18.0)
+		_explorer_name_label.visible = true
+	elif _explorer_name_label != null:
+		_explorer_name_label.visible = false
 
 
 func _process(delta: float) -> void:
@@ -85,6 +98,8 @@ func _process(delta: float) -> void:
 	_explorer_sprite.position = _clamp_to_bounds(new_pos)
 	if _nearby_indicator != null:
 		_nearby_indicator.position = _explorer_sprite.position + Vector2(2.0, -22.0)
+	if _explorer_name_label != null:
+		_explorer_name_label.position = _explorer_sprite.position + Vector2(-10.0, -18.0)
 
 
 func _on_speed_changed(multiplier: float, paused: bool) -> void:
@@ -159,5 +174,5 @@ func _close_egg_popup() -> void:
 
 func _on_zone_pressed() -> void:
 	_zone.disabled = true
-	enter_village.emit()
-
+	var egg_transfers: Array = _egg_manager.get_picked_up_eggs_by_explorer()
+	enter_village.emit(egg_transfers)

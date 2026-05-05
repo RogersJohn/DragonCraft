@@ -1,5 +1,7 @@
 extends Node
 
+signal role_changed(person_id: int, new_role: String)
+
 const Person = preload("res://scripts/person.gd")
 
 var _people: Array = []
@@ -130,6 +132,7 @@ func set_role(person_id: int, role: String) -> void:
 		return
 	p.role = role
 	p.is_explorer = role == "explorer"
+	role_changed.emit(person_id, role)
 
 
 func get_explorer_snapshot() -> Array:

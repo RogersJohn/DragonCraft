@@ -12,6 +12,7 @@ var _time_controls: Node = null
 var _pending_state: Dictionary = {}
 var _explorer_snapshot: Array = []
 var _pending_egg_pickups: Array = []
+var _pending_egg_transfers: Array = []
 
 
 func _ready() -> void:
@@ -86,7 +87,10 @@ func _spawn_world_map() -> void:
 	move_child(_current, 0)
 	_ensure_overlay_on_top()
 	_current.init_explorer(_explorer_snapshot)
-	_current.enter_village.connect(func(): _crossfade_to(_spawn_village))
+	_current.enter_village.connect(func(egg_transfers: Array):
+		_pending_egg_transfers = egg_transfers
+		_crossfade_to(_spawn_village)
+	)
 	_current.egg_picked_up.connect(_on_egg_picked_up)
 	_time_controls.show_controls()
 	TimeController.resume()
@@ -112,3 +116,7 @@ func _spawn_village() -> void:
 	if not _pending_egg_pickups.is_empty():
 		_current.apply_pending_pickups(_pending_egg_pickups)
 		_pending_egg_pickups = []
+	if not _explorer_snapshot.is_empty():
+		_current.receive_explorer_returns(_explorer_snapshot, _pending_egg_transfers)
+		_explorer_snapshot = []
+	_pending_egg_transfers = []

@@ -67,5 +67,12 @@ func _refresh_explorer_button() -> void:
 	_explorer_button.text = "Resign as Explorer" if _is_explorer else "Set as Explorer"
 
 
+func watch_for_explorer_promotion(person_manager: Node) -> void:
+	person_manager.role_changed.connect(func(pid: int, new_role: String):
+		if pid == _person_id and new_role == "explorer":
+			closed.emit()
+	)
+
+
 func _on_explorer_pressed() -> void:
 	explorer_toggled.emit(_person_id, not _is_explorer)
