@@ -2,16 +2,20 @@ extends Node
 
 signal slot_changed(slot_id: int)
 
-const INCUBATION_DURATION := 180.0
-const MAX_SLOTS := 3
+const BASE_TICK: float = 1.0
 
 var _slots: Array = []
 var _dragon_names: Array = []
 var _name_index: int = 0
+var _incubation_duration: float = 180.0
+var _max_slots: int = 3
+var _timer: Timer = null
 
 
 func _ready() -> void:
-	for i in range(1, MAX_SLOTS + 1):
+	_load_config()
+	_load_dragon_names()
+	for i in range(1, _max_slots + 1):
 		_slots.append({
 			"slot_id": i,
 			"state": "empty",
@@ -19,9 +23,33 @@ func _ready() -> void:
 			"species": "",
 			"dragon_name": "",
 			"elapsed": 0.0,
-			"duration": INCUBATION_DURATION
+			"duration": _incubation_duration
 		})
-	_load_dragon_names()
+	_timer = Timer.new()
+	_timer.wait_time = BASE_TICK
+	_timer.autostart = true
+	_timer.timeout.connect(_on_tick)
+	add_child(_timer)
+	TimeController.speed_changed.connect(_on_speed_changed)
+	_on_speed_changed(
+		TimeController.get_speed_multiplier(),
+		TimeController.is_paused()
+	)
+
+
+func _load_config() -> void:
+	if not FileAccess.file_exists("res://data/dragons.json"):
+		push_error("dragons.json not found — using fallback incubation config")
+		return
+	var file := FileAccess.open("res://data/dragons.json", FileAccess.READ)
+	var text := file.get_as_text()
+	file.close()
+	var parsed = JSON.parse_string(text)
+	if parsed == null:
+		push_error("dragons.json failed to parse — using fallback incubation config")
+		return
+	_incubation_duration = float(parsed.get("incubation_seconds", 180))
+	_max_slots = int(parsed.get("max_incubation_slots", 3))
 
 
 func _load_dragon_names() -> void:
@@ -44,17 +72,22 @@ func _load_dragon_names() -> void:
 	_dragon_names = parsed["dragon_names"]
 
 
-func _process(delta: float) -> void:
-	if TimeController.is_paused():
-		return
-	var game_delta := delta * TimeController.get_speed_multiplier()
+func _on_tick() -> void:
 	for slot in _slots:
 		if str(slot["state"]) == "incubating":
-			slot["elapsed"] = float(slot["elapsed"]) + game_delta
+			slot["elapsed"] = float(slot["elapsed"]) + BASE_TICK
 			if float(slot["elapsed"]) >= float(slot["duration"]):
 				slot["elapsed"] = slot["duration"]
 				slot["state"] = "hatched"
 				slot_changed.emit(int(slot["slot_id"]))
+
+
+func _on_speed_changed(multiplier: float, paused: bool) -> void:
+	if paused:
+		_timer.paused = true
+	else:
+		_timer.paused = false
+		_timer.wait_time = BASE_TICK / multiplier
 
 
 func place_egg(slot_id: int, egg_id: String, species: String) -> bool:
@@ -65,7 +98,7 @@ func place_egg(slot_id: int, egg_id: String, species: String) -> bool:
 	_slots[idx]["species"] = species
 	_slots[idx]["dragon_name"] = _pick_dragon_name()
 	_slots[idx]["elapsed"] = 0.0
-	_slots[idx]["duration"] = INCUBATION_DURATION
+	_slots[idx]["duration"] = _incubation_duration
 	_slots[idx]["state"] = "incubating"
 	slot_changed.emit(slot_id)
 	return true
@@ -80,7 +113,7 @@ func clear_slot(slot_id: int) -> void:
 	_slots[idx]["species"] = ""
 	_slots[idx]["dragon_name"] = ""
 	_slots[idx]["elapsed"] = 0.0
-	_slots[idx]["duration"] = INCUBATION_DURATION
+	_slots[idx]["duration"] = _incubation_duration
 	slot_changed.emit(slot_id)
 
 
@@ -122,7 +155,7 @@ func restore(data: Dictionary) -> void:
 		_slots[idx]["species"] = str(slot_data.get("species", ""))
 		_slots[idx]["dragon_name"] = str(slot_data.get("dragon_name", ""))
 		_slots[idx]["elapsed"] = float(slot_data.get("elapsed", 0.0))
-		_slots[idx]["duration"] = float(slot_data.get("duration", INCUBATION_DURATION))
+		_slots[idx]["duration"] = float(slot_data.get("duration", _incubation_duration))
 
 
 func _find_slot(slot_id: int) -> int:

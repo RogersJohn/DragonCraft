@@ -1,5 +1,7 @@
 {
   "schema_version": "1.0",
+  "incubation_seconds": 180,
+  "max_incubation_slots": 3,
   "dragon_names": [
     "Pyreth", "Sylvara", "Thornyx", "Embris", "Coralis",
     "Stonefang", "Verdun", "Auros", "Thalyx", "Mireya",
