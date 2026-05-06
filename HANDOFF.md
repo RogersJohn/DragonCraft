@@ -132,8 +132,8 @@ These are open and should be fixed before or during Phase 4. Do not re-implement
 
 | # | Issue | File | Priority |
 |---|---|---|---|
-| 1 | Explorer name label stays at spawn position while explorer moves | `world_map.gd` | High — visible bug |
-| 2 | `hatchling_dragon.png` has solid black background visible over school interior | `dragon_school_panel.gd` | Medium — cosmetic |
+| 1 | ~~Explorer name label stays at spawn position while explorer moves~~ | `world_map.gd` | ✅ Fixed — Session 16 |
+| 2 | ~~`hatchling_dragon.png` has solid black background visible over school interior~~ | `dragon_school_panel.gd` | ✅ Fixed — Session 16 |
 | 3 | Dragon roster is empty — "Add to Village" clears the nest but creates no dragon entity | `dragon_school_panel.gd` | Phase 4 blocker |
 | 4 | Road constraints for explorer not implemented — moves freely within radius | `world_map.gd` | Deferred |
 | 5 | Ocean egg flagged `requires_boat: true` — permanently unreachable | `egg_manager.gd` | Deferred — boats future phase |
@@ -231,6 +231,7 @@ Wait for approval before suggesting anything further.
 | Session 13 | Explorer visibility, village return, egg transfer, explorer name on map |
 | Session 14 | Dragon school menu, incubation slots, hatching timer, hatchling reveal |
 | Session 15 | Fix: incubation Timer node (was _process), config from dragons.json |
+| Session 16 | Fix: explorer name label follows sprite (Issue #1), hatchling black background shader (Issue #2) |
 
 ---
 
@@ -252,5 +253,5 @@ These define the visual style. All new AI-generated art must match.
 
 ---
 
-*Last updated: End of Session 15 — Phase 3 complete, Phase 4 not started.*
+*Last updated: End of Session 16 — Phase 3 complete, Issues #1 and #2 fixed, Phase 4 not started.*
 *Update this document at the end of every conversation before closing.*
