@@ -66,9 +66,9 @@ func init_explorer(snapshot: Array) -> void:
 			_explorer_name_label = Label.new()
 			_explorer_name_label.add_theme_font_size_override("font_size", 12)
 			_explorer_name_label.add_theme_color_override("font_color", Color(0.9, 0.72, 0.08))
-			add_child(_explorer_name_label)
+			_explorer_sprite.add_child(_explorer_name_label)
+			_explorer_name_label.position = Vector2(-10.0, -18.0)
 		_explorer_name_label.text = explorer_name
-		_explorer_name_label.position = _explorer_sprite.position + Vector2(-10.0, -18.0)
 		_explorer_name_label.visible = true
 	elif _explorer_name_label != null:
 		_explorer_name_label.visible = false
@@ -98,8 +98,6 @@ func _process(delta: float) -> void:
 	_explorer_sprite.position = _clamp_to_bounds(new_pos)
 	if _nearby_indicator != null:
 		_nearby_indicator.position = _explorer_sprite.position + Vector2(2.0, -22.0)
-	if _explorer_name_label != null:
-		_explorer_name_label.position = _explorer_sprite.position + Vector2(-10.0, -18.0)
 
 
 func _on_speed_changed(multiplier: float, paused: bool) -> void:

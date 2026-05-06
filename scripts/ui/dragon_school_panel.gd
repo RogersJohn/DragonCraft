@@ -173,6 +173,22 @@ func _build_hatched_slot(vbox: VBoxContainer, slot: Dictionary) -> void:
 		hatch_rect.expand_mode = 1
 		hatch_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		hatch_rect.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		var bg_shader := Shader.new()
+		bg_shader.code = """
+shader_type canvas_item;
+void fragment() {
+	vec4 col = texture(TEXTURE, UV);
+	float max_c = max(col.r, max(col.g, col.b));
+	float min_c = min(col.r, min(col.g, col.b));
+	float sat = max_c - min_c;
+	float luma = dot(col.rgb, vec3(0.299, 0.587, 0.114));
+	float alpha = max(smoothstep(0.05, 0.15, sat), smoothstep(0.35, 0.55, luma));
+	COLOR = vec4(col.rgb, alpha);
+}
+"""
+		var mat := ShaderMaterial.new()
+		mat.shader = bg_shader
+		hatch_rect.material = mat
 		vbox.add_child(hatch_rect)
 	var species_label := Label.new()
 	species_label.text = _format_species(str(slot.get("species", "")))
