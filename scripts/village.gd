@@ -8,6 +8,8 @@ const HOUSE_MANAGER_SCRIPT := preload("res://scripts/house_manager.gd")
 const PERSON_MANAGER_SCRIPT := preload("res://scripts/person_manager.gd")
 const HOUSE_POPUP_SCENE := preload("res://scenes/ui/HousePopup.tscn")
 const INVENTORY_PANEL_SCENE := preload("res://scenes/ui/InventoryPanel.tscn")
+const DRAGON_SCHOOL_PANEL_SCENE := preload("res://scenes/ui/DragonSchoolPanel.tscn")
+const INCUBATION_MANAGER_SCRIPT := preload("res://scripts/incubation_manager.gd")
 const AUTOSAVE_INTERVAL := 300.0
 
 @onready var _season_label: Label = $HUD/Panel/VBox/SeasonLabel
@@ -37,6 +39,10 @@ var _active_inventory_person_id: int = -1
 var _save_tween: Tween = null
 var _notify_label: Label = null
 var _notify_tween: Tween = null
+var _incubation_manager: Node = null
+var _active_school_panel: Node = null
+var _school_tooltip: Control = null
+var _school_tooltip_label: Label = null
 
 
 func _ready() -> void:
@@ -86,6 +92,11 @@ func _ready() -> void:
 	_update_season_label(SeasonManager.get_current_season(), SeasonManager.get_time_remaining())
 	_day_label.text = "📅 Day %d" % GameClock.get_current_day()
 	_update_hud()
+	_incubation_manager = INCUBATION_MANAGER_SCRIPT.new()
+	add_child(_incubation_manager)
+	_incubation_manager.slot_changed.connect(_on_slot_changed)
+	_connect_school_zone()
+	_create_school_tooltip()
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -168,6 +179,7 @@ func _on_role_changed(person_id: int, new_role: String) -> void:
 
 func _on_house_zone_pressed(house_id: int) -> void:
 	_close_popup()
+	_close_school_panel()
 	_active_popup = HOUSE_POPUP_SCENE.instantiate()
 	_active_popup_house_id = house_id
 	$HUD.add_child(_active_popup)
@@ -317,6 +329,7 @@ func _build_save_state() -> Dictionary:
 		"wood": _wood,
 		"houses": houses,
 		"person_manager": _person_manager.to_dict(),
+		"incubation": _incubation_manager.to_dict(),
 		"season_index": SeasonManager.get_season_index(),
 		"season_elapsed": SeasonManager.get_elapsed(),
 		"game_clock_elapsed": GameClock.get_elapsed_seconds(),
@@ -335,6 +348,7 @@ func restore_state(state: Dictionary) -> void:
 		if not h.is_empty():
 			h["founding_day"] = int(h_state.get("founding_day", 0))
 	_person_manager.restore(state.get("person_manager", {}))
+	_incubation_manager.restore(state.get("incubation", {}))
 	GameClock.restore(float(state.get("game_clock_elapsed", 0.0)))
 	_day_label.text = "📅 Day %d" % GameClock.get_current_day()
 	var saved_speed := float(state.get("speed_multiplier", 1.0))
@@ -373,3 +387,129 @@ func _update_hud() -> void:
 		_person_manager.get_population(),
 		_person_manager.get_max_population()
 	]
+
+
+func _connect_school_zone() -> void:
+	var zone: Button = $DragonSchool
+	UITheme.apply_invisible_zone(zone)
+	zone.pressed.connect(_on_school_zone_pressed)
+	zone.mouse_entered.connect(_on_school_hover_enter)
+	zone.mouse_exited.connect(_on_school_hover_exit)
+
+
+func _on_school_zone_pressed() -> void:
+	_close_popup()
+	_active_school_panel = DRAGON_SCHOOL_PANEL_SCENE.instantiate()
+	$HUD.add_child(_active_school_panel)
+	_active_school_panel.setup(_incubation_manager, _person_manager)
+	_active_school_panel.closed.connect(_close_school_panel)
+	_active_school_panel.dragon_added.connect(_on_dragon_added)
+
+
+func _close_school_panel() -> void:
+	if _active_school_panel != null:
+		_active_school_panel.queue_free()
+		_active_school_panel = null
+
+
+func _on_slot_changed(_slot_id: int) -> void:
+	_update_school_tooltip()
+	if _active_school_panel != null:
+		_active_school_panel.refresh()
+
+
+func _on_dragon_added(dragon_name: String, species: String) -> void:
+	_show_return_notification("%s the %s has joined the village!" % [dragon_name, _format_species(species)])
+
+
+func _create_school_tooltip() -> void:
+	var panel := PanelContainer.new()
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.06, 0.05, 0.02, 0.92)
+	style.border_width_left = 1
+	style.border_width_top = 1
+	style.border_width_right = 1
+	style.border_width_bottom = 1
+	style.border_color = Color(0.75, 0.55, 0.05)
+	style.corner_radius_top_left = 4
+	style.corner_radius_top_right = 4
+	style.corner_radius_bottom_left = 4
+	style.corner_radius_bottom_right = 4
+	panel.add_theme_stylebox_override("panel", style)
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 8)
+	margin.add_theme_constant_override("margin_right", 8)
+	margin.add_theme_constant_override("margin_top", 4)
+	margin.add_theme_constant_override("margin_bottom", 4)
+	panel.add_child(margin)
+	_school_tooltip_label = Label.new()
+	_school_tooltip_label.add_theme_color_override("font_color", Color(0.9, 0.72, 0.08))
+	_school_tooltip_label.add_theme_font_size_override("font_size", 12)
+	margin.add_child(_school_tooltip_label)
+	panel.visible = false
+	$HUD.add_child(panel)
+	_school_tooltip = panel
+
+
+func _on_school_hover_enter() -> void:
+	_update_school_tooltip()
+	_school_tooltip.visible = true
+	call_deferred("_position_school_tooltip")
+
+
+func _on_school_hover_exit() -> void:
+	if _school_tooltip != null:
+		_school_tooltip.visible = false
+
+
+func _update_school_tooltip() -> void:
+	if _school_tooltip_label == null:
+		return
+	_school_tooltip_label.text = _build_school_tooltip_text()
+
+
+func _position_school_tooltip() -> void:
+	if _school_tooltip == null or not _school_tooltip.visible:
+		return
+	var zone_rect: Rect2 = $DragonSchool.get_global_rect()
+	var tip_size: Vector2 = _school_tooltip.get_minimum_size()
+	_school_tooltip.position = Vector2(
+		clamp(zone_rect.position.x, 8.0, get_viewport_rect().size.x - tip_size.x - 8.0),
+		max(8.0, zone_rect.position.y - tip_size.y - 8.0)
+	)
+
+
+func _build_school_tooltip_text() -> String:
+	var lines := []
+	for slot in _incubation_manager.get_all_slots():
+		var state: String = str(slot.get("state", "empty"))
+		if state == "incubating":
+			var remaining: float = max(0.0, float(slot["duration"]) - float(slot["elapsed"]))
+			var mins: int = int(remaining) / 60
+			var secs: int = int(remaining) % 60
+			lines.append("Nest %d: %s — %02d:%02d" % [
+				int(slot["slot_id"]),
+				_format_species(str(slot.get("species", ""))),
+				mins, secs
+			])
+		elif state == "hatched":
+			lines.append("Nest %d: %s — Hatched!" % [
+				int(slot["slot_id"]),
+				_format_species(str(slot.get("species", "")))
+			])
+	if lines.is_empty():
+		return "Dragon Training School"
+	return "\n".join(lines)
+
+
+func _format_species(raw: String) -> String:
+	if raw.is_empty() or raw == "unknown":
+		return "Dragon"
+	var parts := raw.split("_")
+	var result := ""
+	for part in parts:
+		if result != "":
+			result += " "
+		result += part.substr(0, 1).to_upper() + part.substr(1)
+	return result

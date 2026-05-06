@@ -168,6 +168,20 @@ func get_explorers() -> Array:
 	return result
 
 
+func get_all_inventory_eggs() -> Array:
+	var result := []
+	for p in _people:
+		for item in p.inventory:
+			if str(item.get("type", "")) == "egg":
+				result.append({
+					"person_id": p.id,
+					"person_name": p.name,
+					"egg_id": str(item.get("id", "")),
+					"species": str(item.get("species", "unknown"))
+				})
+	return result
+
+
 func to_dict() -> Dictionary:
 	var people_data := []
 	for p in _people:

@@ -1,24 +1,46 @@
 {
   "schema_version": "1.0",
-  "dragons": [
+  "dragon_names": [
+    "Pyreth", "Sylvara", "Thornyx", "Embris", "Coralis",
+    "Stonefang", "Verdun", "Auros", "Thalyx", "Mireya",
+    "Cindrel", "Wavecrest", "Glacius", "Ferrus", "Brimsol",
+    "Oakhide", "Duskwing", "Seraphel", "Voltan", "Crysta"
+  ],
+  "species": [
     {
-      "id": "",
-      "name": "",
-      "description": "",
-      "element": "",
-      "rarity": "",
-      "base_stats": {
-        "health": 0,
-        "speed": 0,
-        "strength": 0,
-        "magic": 0
-      },
-      "growth_stages": {
-        "egg_duration_seconds": 0,
-        "hatchling_duration_seconds": 0
-      },
-      "abilities": [],
-      "unlock_condition": ""
+      "id": "forest_drake",
+      "display_name": "Forest Drake",
+      "element": "nature",
+      "rarity": "common",
+      "base_stats": { "health": 80, "speed": 90, "strength": 70, "magic": 60 }
+    },
+    {
+      "id": "stone_drake",
+      "display_name": "Stone Drake",
+      "element": "earth",
+      "rarity": "common",
+      "base_stats": { "health": 120, "speed": 50, "strength": 100, "magic": 40 }
+    },
+    {
+      "id": "ember_drake",
+      "display_name": "Ember Drake",
+      "element": "fire",
+      "rarity": "uncommon",
+      "base_stats": { "health": 70, "speed": 80, "strength": 90, "magic": 100 }
+    },
+    {
+      "id": "sea_drake",
+      "display_name": "Sea Drake",
+      "element": "water",
+      "rarity": "rare",
+      "base_stats": { "health": 90, "speed": 110, "strength": 60, "magic": 90 }
+    },
+    {
+      "id": "gold_drake",
+      "display_name": "Gold Drake",
+      "element": "light",
+      "rarity": "legendary",
+      "base_stats": { "health": 100, "speed": 100, "strength": 100, "magic": 150 }
     }
   ]
 }
