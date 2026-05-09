@@ -106,6 +106,9 @@ func _spawn_village() -> void:
 	move_child(_current, 0)
 	_ensure_overlay_on_top()
 	_time_controls.show_controls()
+	_current.state_snapshot.connect(func(state: Dictionary):
+		_pending_state = state
+	)
 	_current.back_to_map.connect(func():
 		_explorer_snapshot = _current.get_explorer_snapshot()
 		_crossfade_to(_spawn_world_map)

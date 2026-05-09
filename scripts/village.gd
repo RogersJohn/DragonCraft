@@ -3,6 +3,7 @@ extends Control
 const UITheme = preload("res://scripts/ui/ui_theme.gd")
 
 signal back_to_map
+signal state_snapshot(state: Dictionary)
 
 const HOUSE_MANAGER_SCRIPT := preload("res://scripts/house_manager.gd")
 const PERSON_MANAGER_SCRIPT := preload("res://scripts/person_manager.gd")
@@ -29,6 +30,9 @@ var _base_tick_food: float = 0.0
 var _base_tick_gold: float = 0.0
 var _base_tick_wood: float = 0.0
 var _tick_multiplier: float = 1.0
+var _food_tick_mult: float = 1.0
+var _wood_tick_mult: float = 1.0
+var _gold_tick_mult: float = 1.0
 var _base_tick_interval: float = 5.0
 var _house_manager: Node = null
 var _person_manager: Node = null
@@ -142,9 +146,9 @@ func _on_speed_changed(multiplier: float, paused: bool) -> void:
 
 
 func _on_tick() -> void:
-	_food += _base_tick_food * _tick_multiplier
-	_gold += _base_tick_gold * _tick_multiplier
-	_wood += _base_tick_wood * _tick_multiplier
+	_food += _base_tick_food * _food_tick_mult
+	_gold += _base_tick_gold * _gold_tick_mult
+	_wood += _base_tick_wood * _wood_tick_mult
 	_update_hud()
 	if _active_popup != null:
 		_active_popup.refresh(_house_manager.get_house(_active_popup_house_id), _food)
@@ -155,6 +159,9 @@ func _on_season_changed(season_data: Dictionary) -> void:
 	_gold += float(season_data.get("gold_bonus", 0))
 	_wood += float(season_data.get("wood_bonus", 0))
 	_tick_multiplier = float(season_data.get("tick_multiplier", 1.0))
+	_food_tick_mult = float(season_data.get("food_tick_multiplier", 1.0))
+	_wood_tick_mult = float(season_data.get("wood_tick_multiplier", 1.0))
+	_gold_tick_mult = float(season_data.get("gold_tick_multiplier", 1.0))
 	_update_hud()
 	if not bool(season_data.get("population_growth_allowed", true)):
 		_close_popup()
@@ -376,6 +383,7 @@ func _update_season_label(season: Dictionary, time_remaining: float) -> void:
 
 func _on_back_pressed() -> void:
 	_back_button.disabled = true
+	state_snapshot.emit(_build_save_state())
 	back_to_map.emit()
 
 

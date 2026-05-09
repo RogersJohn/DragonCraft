@@ -8,6 +8,9 @@
       "wood_bonus": 0,
       "gold_bonus": 0,
       "tick_multiplier": 1.0,
+      "food_tick_multiplier": 1.5,
+      "wood_tick_multiplier": 1.0,
+      "gold_tick_multiplier": 1.0,
       "population_growth_allowed": true
     },
     {
@@ -17,6 +20,9 @@
       "wood_bonus": 50,
       "gold_bonus": 0,
       "tick_multiplier": 1.0,
+      "food_tick_multiplier": 1.0,
+      "wood_tick_multiplier": 1.5,
+      "gold_tick_multiplier": 1.0,
       "population_growth_allowed": true
     },
     {
@@ -26,6 +32,9 @@
       "wood_bonus": 0,
       "gold_bonus": 50,
       "tick_multiplier": 1.0,
+      "food_tick_multiplier": 1.25,
+      "wood_tick_multiplier": 1.0,
+      "gold_tick_multiplier": 1.25,
       "population_growth_allowed": true
     },
     {
@@ -35,6 +44,9 @@
       "wood_bonus": 0,
       "gold_bonus": 0,
       "tick_multiplier": 0.5,
+      "food_tick_multiplier": 0.5,
+      "wood_tick_multiplier": 0.5,
+      "gold_tick_multiplier": 0.5,
       "population_growth_allowed": false
     }
   ]
